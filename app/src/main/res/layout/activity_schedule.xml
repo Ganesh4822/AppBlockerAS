@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- App Name -->
+    <TextView
+        android:id="@+id/appNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="App Name"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <!-- Start Time Picker -->
+    <Button
+        android:id="@+id/startTimeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Start Time" />
+
+    <TextView
+        android:id="@+id/startTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Time: Not Set"
+        android:paddingBottom="8dp" />
+
+    <!-- End Time Picker -->
+    <Button
+        android:id="@+id/endTimeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select End Time" />
+
+    <TextView
+        android:id="@+id/endTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="End Time: Not Set"
+        android:paddingBottom="8dp" />
+
+    <!-- Day Selection -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Days:" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <CheckBox android:id="@+id/monCheckBox" android:text="Mon"  android:layout_width="wrap_content"  android:layout_height="wrap_content"/>
+        <CheckBox android:id="@+id/tueCheckBox" android:text="Tue" android:layout_width="wrap_content"  android:layout_height="wrap_content"/>
+        <CheckBox android:id="@+id/wedCheckBox" android:text="Wed" android:layout_width="wrap_content"  android:layout_height="wrap_content"/>
+        <CheckBox android:id="@+id/thuCheckBox" android:text="Thu" android:layout_width="wrap_content"  android:layout_height="wrap_content"/>
+        <CheckBox android:id="@+id/friCheckBox" android:text="Fri" android:layout_width="wrap_content"  android:layout_height="wrap_content"/>
+        <CheckBox android:id="@+id/satCheckBox" android:text="Sat" android:layout_width="wrap_content"  android:layout_height="wrap_content"/>
+        <CheckBox android:id="@+id/sunCheckBox" android:text="Sun" android:layout_width="wrap_content"  android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/saveScheduleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Schedule"
+        android:layout_marginTop="16dp" />
+
+    <!-- clear Button -->
+    <Button
+        android:id="@+id/clearScheduleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear Schedule"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"/>
+
+</LinearLayout>

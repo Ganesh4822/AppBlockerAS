@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Toggle for Schedule-Based Blocking -->
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/schedule_blocking_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enable Schedule-Based Blocking" />
+
+    <!-- Schedule Selection (Visible only if Schedule Blocking is enabled) -->
+    <Button
+        android:id="@+id/schedule_selection_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Schedule"
+        android:visibility="gone" />
+
+    <!-- Toggle for Time-Based Blocking -->
+    <Switch
+        android:id="@+id/time_blocking_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enable Time-Based Blocking" />
+
+    <!-- Input for Usage Limit (Visible only if Time-Based Blocking is enabled) -->
+    <EditText
+        android:id="@+id/time_limit_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter daily usage limit (minutes)"
+        android:inputType="number"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save" />
+
+</LinearLayout>
