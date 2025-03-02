@@ -50,6 +50,9 @@
         <activity android:name=".ScheduleActivity"
             android:theme="@style/Theme.AppBlocker"/>
 
+        <activity android:name=".BlockingOptionsActivity"
+            android:theme="@style/Theme.AppBlocker"/>
+
         <activity
             android:name=".BlockScreenActivity"
             android:launchMode="singleTask"

@@ -1,12 +1,16 @@
+package com.example.appblocker
+
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.appblocker.R
+import androidx.appcompat.widget.SwitchCompat
 
 class BlockingOptionsActivity : AppCompatActivity() {
     private lateinit var scheduleSwitch: Switch
@@ -15,25 +19,24 @@ class BlockingOptionsActivity : AppCompatActivity() {
     private lateinit var timeLimitInput: EditText
     private lateinit var saveButton: Button
     private lateinit var sharedPreferences: SharedPreferences
-    private val sharedPrefs by lazy { getSharedPreferences("BlockingPrefs", MODE_PRIVATE) }
+    private lateinit var selectedAppName: String
+    private lateinit var selectedPackageName: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_blocking_options)
-
+        sharedPreferences = getSharedPreferences("AppBlockerPrefs", MODE_PRIVATE)
         scheduleSwitch = findViewById(R.id.schedule_blocking_switch)
         timeSwitch = findViewById(R.id.time_blocking_switch)
         scheduleButton = findViewById(R.id.schedule_selection_button)
         timeLimitInput = findViewById(R.id.time_limit_input)
         saveButton = findViewById(R.id.save_button)
 
-        sharedPreferences = getSharedPreferences("BlockingPrefs", MODE_PRIVATE)
+        selectedAppName = intent.getStringExtra("APP_NAME") ?: "Unknown App"
+        selectedPackageName = intent.getStringExtra("PACKAGE_NAME") ?: ""
+        Log.d("Appcheck","share pref are ${sharedPreferences.all}")
 
-        // Load saved preferences
-        loadTimeBlockingSettings()
-//        scheduleSwitch.isChecked = sharedPreferences.getBoolean("schedule_blocking", false)
-//        timeSwitch.isChecked = sharedPreferences.getBoolean("time_blocking", false)
-//        timeLimitInput.setText(sharedPreferences.getInt("time_limit", 0).toString())
+        loadBlockingSettings()
 
         // Manage visibility based on switches
         scheduleButton.visibility = if (scheduleSwitch.isChecked) View.VISIBLE else View.GONE
@@ -48,38 +51,37 @@ class BlockingOptionsActivity : AppCompatActivity() {
         }
 
         saveButton.setOnClickListener {
-            val isTimeBlockingEnabled = timeSwitch.isChecked
-            val timeLimit = timeLimitInput.text.toString().toIntOrNull() ?: 0
-
-            saveTimeBlockingSettings(isTimeBlockingEnabled, timeLimit)
-            Toast.makeText(this, "Settings Saved!", Toast.LENGTH_SHORT).show()
             savePreferences()
+            Toast.makeText(this, "Settings Saved!", Toast.LENGTH_SHORT).show()
+        }
+        scheduleButton.setOnClickListener {
+            val intent = Intent(this, ScheduleActivity::class.java).apply {
+                putExtra("APP_NAME", selectedAppName)
+                putExtra("PACKAGE_NAME", selectedPackageName)
+            }
+            startActivity(intent)
         }
     }
 
     private fun savePreferences() {
         val editor = sharedPreferences.edit()
-        editor.putBoolean("schedule_blocking", scheduleSwitch.isChecked)
-        editor.putBoolean("time_blocking", timeSwitch.isChecked)
-        editor.putInt("time_limit", timeLimitInput.text.toString().toIntOrNull() ?: 0)
+        editor.putBoolean("${selectedPackageName}_schedule_blocking", scheduleSwitch.isChecked)
+        editor.putBoolean("${selectedPackageName}_time_blocking", timeSwitch.isChecked)
+        editor.putInt("${selectedPackageName}_time_limit", timeLimitInput.text.toString().toIntOrNull() ?: 0)
         editor.apply()
         finish() // Close activity after saving
     }
 
-    private fun saveTimeBlockingSettings(enabled: Boolean, limit: Int) {
-        sharedPrefs.edit().apply {
-            putBoolean("TIME_BLOCKING_ENABLED", enabled)
-            putInt("TIME_BLOCKING_LIMIT", limit)
-            apply()
-        }
-    }
+    private fun loadBlockingSettings() {
+        val schedule = sharedPreferences.getString("SCHEDULE_${selectedPackageName}",null)
+        val isScheduleBlockingEnabled = sharedPreferences.getBoolean("${selectedPackageName}_schedule_blocking", false)
+        Log.d("Appcheck","Is shcedule blocking enabled for $selectedPackageName $isScheduleBlockingEnabled and scedule is $schedule")
+        val isTimeBlockingEnabled = sharedPreferences.getBoolean("${selectedPackageName}_time_blocking", false)
+        val timeLimit = sharedPreferences.getInt("${selectedPackageName}_time_limit", 0)
 
-    private fun loadTimeBlockingSettings() {
-        val isEnabled = sharedPrefs.getBoolean("TIME_BLOCKING_ENABLED", false)
-        val timeLimit = sharedPrefs.getInt("TIME_BLOCKING_LIMIT", 0)
-
-        timeSwitch.isChecked = isEnabled
+        timeSwitch.isChecked = isTimeBlockingEnabled
+        scheduleSwitch.isChecked = isScheduleBlockingEnabled
         timeLimitInput.setText(if (timeLimit > 0) timeLimit.toString() else "")
-        timeLimitInput.visibility = if (isEnabled) View.VISIBLE else View.GONE
+        timeLimitInput.visibility = if (isTimeBlockingEnabled) View.VISIBLE else View.GONE
     }
 }

@@ -3,6 +3,7 @@ package com.example.appblocker
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.ActivityManager
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -12,6 +13,7 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class AppBlockerService : AccessibilityService() {
 
@@ -34,8 +36,19 @@ class AppBlockerService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null || event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
 
+        val isTimeBlockingEnabled = sharedPreferences.getBoolean("time_blocking", false)
+        val timeLimitMinutes = sharedPreferences.getInt("time_limit", 0)
         val packageName = event.packageName?.toString() ?: return
         Log.d("AppCheck", "App Launched: $packageName")
+
+        if (isTimeBlockingEnabled) {
+            val totalUsage = getTotalUsageTime(packageName) / 60000 // Convert ms to minutes
+            if (totalUsage >= timeLimitMinutes) {
+                showBlockScreen(packageName)
+                performGlobalAction(GLOBAL_ACTION_HOME)
+                return
+            }
+        }
 
         if (isAppBlocked(packageName)) {
             Log.d("AppCheck", "Blocking app: $packageName")
@@ -56,7 +69,7 @@ class AppBlockerService : AccessibilityService() {
 
     private fun isAppBlocked(packageName: String): Boolean {
         val schedule = sharedPreferences.getString("SCHEDULE_$packageName", null) ?: return false
-        Log.d("AppCheck", "App Launched schedule: $schedule")
+
         var (timeRange, days) = schedule.split("|")
         days = days.split(",").toString()
         val (startTime, endTime) = timeRange.split("-")
@@ -66,7 +79,7 @@ class AppBlockerService : AccessibilityService() {
         val currentDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
         val currentTimeMin =  timeToMinutes(currentTime)
-        Log.d("AppCheck", "start time : $startTimeMin, end time : $endTimeMin")
+
         if (!days.contains(currentDay)){
             return false
         } // Not a blocked day
@@ -75,7 +88,7 @@ class AppBlockerService : AccessibilityService() {
         } else {
             currentTimeMin >= startTimeMin || currentTimeMin <= endTimeMin
         }
-        Log.d("AppCheck", "flag: $isWithinSchedule, currentTiem : $currentTimeMin")
+
         return isWithinSchedule  // Check if time is within blocked range
     }
     fun timeToMinutes(time: String): Int {
@@ -92,6 +105,24 @@ class AppBlockerService : AccessibilityService() {
             }
             startActivity(intent)
         }, 500) // 500ms delay
+    }
+
+    private fun getTotalUsageTime(packageName: String): Long {
+        val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val endTime = System.currentTimeMillis()
+        val startTime = endTime - TimeUnit.DAYS.toMillis(1)  // Check usage in the last 24 hours
+
+        val stats = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY, startTime, endTime
+        )
+
+        var totalTime: Long = 0
+        for (usageStat in stats) {
+            if (usageStat.packageName == packageName) {
+                totalTime += usageStat.totalTimeInForeground
+            }
+        }
+        return totalTime // Return total time in milliseconds
     }
 
     private fun exitPipMode() {

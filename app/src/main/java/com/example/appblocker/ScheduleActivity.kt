@@ -1,4 +1,4 @@
-package com.example.appblocker  // Change this to your package name
+package com.example.appblocker
 
 import android.app.TimePickerDialog
 import android.content.SharedPreferences
@@ -138,7 +138,7 @@ class ScheduleActivity : AppCompatActivity() {
         }
         val scheduleData = "$timePart|${selectedDays.joinToString(",")}"
         sharedPreferences.edit().putString("SCHEDULE_$packageName", scheduleData).apply()
-        Log.d("App_schedule","print : $scheduleData, ${sharedPreferences.all}")
+
 
     }
 }

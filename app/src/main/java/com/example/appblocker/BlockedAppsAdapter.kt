@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appblocker.MainActivity
@@ -56,7 +55,7 @@ class BlockedAppsAdapter(
         holder.checkBox.isChecked = isBlocked
 
         //holder.appIcon.setImageDrawable(app.icon)
-        Log.d("AppCheck", "Blockd apps: $blockedApps)")
+        Log.d("AppCheck", "Blocked apps: $blockedApps)")
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 blockedApps.add(app.packageName)
@@ -64,7 +63,7 @@ class BlockedAppsAdapter(
             } else {
                 blockedApps.remove(app.packageName)
             }
-            // ✅ Save updated blocked apps list
+            // Save updated blocked apps list
             sharedPreferences.edit().putStringSet("blocked_apps", blockedApps).apply()
         }
     }

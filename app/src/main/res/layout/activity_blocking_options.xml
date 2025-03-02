@@ -6,7 +6,7 @@
     android:padding="16dp">
 
     <!-- Toggle for Schedule-Based Blocking -->
-    <androidx.appcompat.widget.SwitchCompat
+    <Switch
         android:id="@+id/schedule_blocking_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -1,5 +1,6 @@
 package com.example.appblocker
 
+
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity() {
         //adapter = BlockedAppsAdapter(this, appList)
         adapter = BlockedAppsAdapter(this,appList) { selectedApp ->
             // When user clicks on an app, navigate to ScheduleActivity
-            val intent = Intent(this, ScheduleActivity::class.java).apply {
+            val intent = Intent(this, BlockingOptionsActivity::class.java).apply {
                 putExtra("APP_NAME", selectedApp.name)
                 putExtra("PACKAGE_NAME", selectedApp.packageName)
             }
