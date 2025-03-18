@@ -1,8 +1,8 @@
 package com.example.appblocker
 
+
 import android.app.TimePickerDialog
 import android.content.SharedPreferences
-import android.util.Log
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -26,18 +26,21 @@ class ScheduleActivity : AppCompatActivity() {
     private lateinit var friCheckBox: CheckBox
     private lateinit var satCheckBox: CheckBox
     private lateinit var sunCheckBox: CheckBox
+    private lateinit var sharedPreferencesHelper: SharedPreferencesHelper
 
     private var selectedStartTime: String = ""
     private var selectedEndTime: String = ""
     private var selectedDays = mutableSetOf<String>()
 
+    //todo
+    //Need to deprecate
     private lateinit var sharedPreferences: SharedPreferences
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_schedule)
-
+        sharedPreferencesHelper = SharedPreferencesHelper(this)
         // Initialize UI components
         appNameTextView = findViewById(R.id.appNameTextView)
         startTimeButton = findViewById(R.id.startTimeButton)
@@ -54,6 +57,7 @@ class ScheduleActivity : AppCompatActivity() {
         friCheckBox = findViewById(R.id.friCheckBox)
         satCheckBox = findViewById(R.id.satCheckBox)
         sunCheckBox = findViewById(R.id.sunCheckBox)
+
 
         sharedPreferences = getSharedPreferences("AppBlockerPrefs", MODE_PRIVATE)
         // Get the app name passed from previous activity
@@ -137,8 +141,19 @@ class ScheduleActivity : AppCompatActivity() {
             selectedDays.addAll(listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
         }
         val scheduleData = "$timePart|${selectedDays.joinToString(",")}"
-        sharedPreferences.edit().putString("SCHEDULE_$packageName", scheduleData).apply()
 
+        val appData = sharedPreferencesHelper.getBlockedAppData(packageName) ?: BlockedAppData(
+            isBlockingEnabled = false,
+            isScheduleBasedBlockingEnabled = false,
+            isTimeBasedBlockingEnabled = false,
+            schedules = mutableListOf(),
+            timeLimit = 0,
+
+        )
+        appData.isBlockingEnabled = true
+        appData.isScheduleBasedBlockingEnabled = true
+        appData.schedules.add(scheduleData)
+        sharedPreferencesHelper.saveBlockedAppData(packageName, appData)
 
     }
 }

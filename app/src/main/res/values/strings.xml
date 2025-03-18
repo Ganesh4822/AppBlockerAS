@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">AppBlocker</string>
     <string name="accessibility_service_description">This service is needed to block selected apps.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

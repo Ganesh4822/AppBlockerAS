@@ -14,16 +14,21 @@ import android.view.accessibility.AccessibilityEvent
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.List
 
 class AppBlockerService : AccessibilityService() {
 
     private lateinit var sharedPreferences: SharedPreferences
+
+    private lateinit var sharedPreferencesHelper: SharedPreferencesHelper
 
     override fun onServiceConnected() {
         super.onServiceConnected()
         Log.d("AppCheck", "Accessibility Service Connected")
 
         sharedPreferences = getSharedPreferences("AppBlockerPrefs", MODE_PRIVATE)
+
+        sharedPreferencesHelper = SharedPreferencesHelper(this)
 
         val info = AccessibilityServiceInfo().apply {
             eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
@@ -35,10 +40,10 @@ class AppBlockerService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null || event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-
-        val isTimeBlockingEnabled = sharedPreferences.getBoolean("time_blocking", false)
-        val timeLimitMinutes = sharedPreferences.getInt("time_limit", 0)
         val packageName = event.packageName?.toString() ?: return
+        val BlockData = sharedPreferencesHelper.getBlockedAppData(packageName)
+        val isTimeBlockingEnabled = sharedPreferences.getBoolean("${packageName}_time_blocking", false)
+        val timeLimitMinutes = sharedPreferences.getInt("${packageName}_time_limit", 0)
         Log.d("AppCheck", "App Launched: $packageName")
 
         if (isTimeBlockingEnabled) {
@@ -49,7 +54,6 @@ class AppBlockerService : AccessibilityService() {
                 return
             }
         }
-
         if (isAppBlocked(packageName)) {
             Log.d("AppCheck", "Blocking app: $packageName")
 
@@ -59,7 +63,6 @@ class AppBlockerService : AccessibilityService() {
             Handler(Looper.getMainLooper()).postDelayed({
                 exitPipMode()
             }, 300)
-
         }
     }
 
@@ -68,28 +71,30 @@ class AppBlockerService : AccessibilityService() {
     }
 
     private fun isAppBlocked(packageName: String): Boolean {
-        val schedule = sharedPreferences.getString("SCHEDULE_$packageName", null) ?: return false
+        val schedules = sharedPreferencesHelper.getBlockedAppData(packageName)?.schedules ?: return false
 
-        var (timeRange, days) = schedule.split("|")
-        days = days.split(",").toString()
-        val (startTime, endTime) = timeRange.split("-")
-        val startTimeMin =  timeToMinutes(startTime)
-        val endTimeMin =  timeToMinutes(endTime)
+        for(schedule in schedules){
+            var (timeRange, days) = schedule.split("|")
+            days = days.split(",").toString()
+            val (startTime, endTime) = timeRange.split("-")
+            val startTimeMin =  timeToMinutes(startTime)
+            val endTimeMin =  timeToMinutes(endTime)
 
-        val currentDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-        val currentTimeMin =  timeToMinutes(currentTime)
+            val currentDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
+            val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+            val currentTimeMin =  timeToMinutes(currentTime)
 
-        if (!days.contains(currentDay)){
-            return false
-        } // Not a blocked day
-        val isWithinSchedule = if (startTimeMin < endTimeMin) {
-            currentTimeMin in startTimeMin..endTimeMin
-        } else {
-            currentTimeMin >= startTimeMin || currentTimeMin <= endTimeMin
+            if (!days.contains(currentDay)){
+                continue
+            } // Not a blocked day
+            val isWithinSchedule = if (startTimeMin < endTimeMin) {
+                currentTimeMin in startTimeMin..endTimeMin
+            } else {
+                currentTimeMin >= startTimeMin || currentTimeMin <= endTimeMin
+            }
+            return isWithinSchedule
         }
-
-        return isWithinSchedule  // Check if time is within blocked range
+        return false
     }
     fun timeToMinutes(time: String): Int {
 

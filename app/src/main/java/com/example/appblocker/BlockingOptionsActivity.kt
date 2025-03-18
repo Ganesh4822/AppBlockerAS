@@ -1,5 +1,6 @@
 package com.example.appblocker
 
+
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -10,7 +11,7 @@ import android.widget.EditText
 import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import com.google.gson.Gson
 
 class BlockingOptionsActivity : AppCompatActivity() {
     private lateinit var scheduleSwitch: Switch
@@ -19,12 +20,15 @@ class BlockingOptionsActivity : AppCompatActivity() {
     private lateinit var timeLimitInput: EditText
     private lateinit var saveButton: Button
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var sharedPreferencesHelper: SharedPreferencesHelper
     private lateinit var selectedAppName: String
     private lateinit var selectedPackageName: String
+    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_blocking_options)
+        sharedPreferencesHelper = SharedPreferencesHelper(this)
         sharedPreferences = getSharedPreferences("AppBlockerPrefs", MODE_PRIVATE)
         scheduleSwitch = findViewById(R.id.schedule_blocking_switch)
         timeSwitch = findViewById(R.id.time_blocking_switch)
@@ -35,6 +39,7 @@ class BlockingOptionsActivity : AppCompatActivity() {
         selectedAppName = intent.getStringExtra("APP_NAME") ?: "Unknown App"
         selectedPackageName = intent.getStringExtra("PACKAGE_NAME") ?: ""
         Log.d("Appcheck","share pref are ${sharedPreferences.all}")
+        Log.d("Appcheck","share pref are ${sharedPreferencesHelper.getBlockedAppData(selectedPackageName)}")
 
         loadBlockingSettings()
 
@@ -43,12 +48,18 @@ class BlockingOptionsActivity : AppCompatActivity() {
         timeLimitInput.visibility = if (timeSwitch.isChecked) View.VISIBLE else View.GONE
 
         scheduleSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (!isChecked) {
+                deleteScheduleForApp(selectedPackageName)
+            }
             scheduleButton.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
-        timeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            timeLimitInput.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
+//        timeSwitch.setOnCheckedChangeListener { _, isChecked ->
+//            if (!isChecked) {
+//                deleteTimeLimitForApp(selectedPackageName)
+//            }
+//            timeLimitInput.visibility = if (isChecked) View.VISIBLE else View.GONE
+//        }
 
         saveButton.setOnClickListener {
             savePreferences()
@@ -64,24 +75,50 @@ class BlockingOptionsActivity : AppCompatActivity() {
     }
 
     private fun savePreferences() {
-        val editor = sharedPreferences.edit()
-        editor.putBoolean("${selectedPackageName}_schedule_blocking", scheduleSwitch.isChecked)
-        editor.putBoolean("${selectedPackageName}_time_blocking", timeSwitch.isChecked)
-        editor.putInt("${selectedPackageName}_time_limit", timeLimitInput.text.toString().toIntOrNull() ?: 0)
-        editor.apply()
-        finish() // Close activity after saving
+        val timeLimit = timeLimitInput.text.toString().toIntOrNull() ?: 0
+        val appData = sharedPreferencesHelper.getBlockedAppData(selectedPackageName) ?: BlockedAppData(
+            isBlockingEnabled = false,
+            isScheduleBasedBlockingEnabled = false,
+            isTimeBasedBlockingEnabled = false,
+            schedules = mutableListOf(),
+            timeLimit = 0
+        )
+        val updatedData = appData.copy(
+            isScheduleBasedBlockingEnabled = scheduleSwitch.isChecked,
+            isTimeBasedBlockingEnabled = timeSwitch.isChecked,
+            timeLimit = if (timeSwitch.isChecked) timeLimit else 0
+        )
+        if (!updatedData.isScheduleBasedBlockingEnabled && !updatedData.isTimeBasedBlockingEnabled) {
+            sharedPreferencesHelper.deleteBlockedAppData(selectedPackageName)
+        } else {
+            sharedPreferencesHelper.saveBlockedAppData(selectedPackageName, updatedData)
+        }
+        finish()
+
     }
 
     private fun loadBlockingSettings() {
-        val schedule = sharedPreferences.getString("SCHEDULE_${selectedPackageName}",null)
-        val isScheduleBlockingEnabled = sharedPreferences.getBoolean("${selectedPackageName}_schedule_blocking", false)
-        Log.d("Appcheck","Is shcedule blocking enabled for $selectedPackageName $isScheduleBlockingEnabled and scedule is $schedule")
-        val isTimeBlockingEnabled = sharedPreferences.getBoolean("${selectedPackageName}_time_blocking", false)
-        val timeLimit = sharedPreferences.getInt("${selectedPackageName}_time_limit", 0)
+        val appData = sharedPreferencesHelper.getBlockedAppData(selectedPackageName)
 
-        timeSwitch.isChecked = isTimeBlockingEnabled
-        scheduleSwitch.isChecked = isScheduleBlockingEnabled
-        timeLimitInput.setText(if (timeLimit > 0) timeLimit.toString() else "")
-        timeLimitInput.visibility = if (isTimeBlockingEnabled) View.VISIBLE else View.GONE
+        if (appData != null) {
+            scheduleSwitch.isChecked = appData.isScheduleBasedBlockingEnabled
+            timeSwitch.isChecked = appData.isTimeBasedBlockingEnabled
+            timeLimitInput.setText(if (appData.timeLimit > 0) appData.timeLimit.toString() else "")
+        } else {
+            scheduleSwitch.isChecked = false
+            timeSwitch.isChecked = false
+            timeLimitInput.setText("")
+        }
+        scheduleButton.visibility = if (scheduleSwitch.isChecked) View.VISIBLE else View.GONE
+        timeLimitInput.visibility = if (timeSwitch.isChecked) View.VISIBLE else View.GONE
     }
+
+    private fun deleteScheduleForApp(packageName: String) {
+        val appData = sharedPreferencesHelper.getBlockedAppData(selectedPackageName)
+
+    }
+
+//    private fun deleteTimeLimitForApp(packageName: String) {
+//        sharedPreferences.edit().remove("${packageName}_time_limit").apply()
+//    }
 }

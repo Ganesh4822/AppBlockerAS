@@ -1,6 +1,7 @@
 package com.yourpackage
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,13 +9,14 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appblocker.AppsFragment
 import com.example.appblocker.MainActivity
 import com.example.appblocker.R
 
 class BlockedAppsAdapter(
     private val context: Context,
-    private val appList: List<MainActivity.AppInfo>,
-    private val onAppClick: (MainActivity.AppInfo) -> Unit,// List of installed apps
+    private var appList: List<ApplicationInfo>,
+    private val onAppClick: (ApplicationInfo) -> Unit,// List of installed apps
 ) : RecyclerView.Adapter<BlockedAppsAdapter.ViewHolder>() {
 
     private val sharedPreferences = context.getSharedPreferences("AppBlockerPrefs", Context.MODE_PRIVATE)
@@ -32,9 +34,14 @@ class BlockedAppsAdapter(
         return ViewHolder(view)
     }
 
+    fun updateList(newList: List<ApplicationInfo>) {
+        appList = newList
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = appList[position]
-        holder.appName.text = app.name
+        holder.appName.text = holder.itemView.context.packageManager.getApplicationLabel(app).toString()
 
 
         val schedule = sharedPreferences.getString("SCHEDULE_${app.packageName}",null)
@@ -69,4 +76,6 @@ class BlockedAppsAdapter(
     }
 
     override fun getItemCount() = appList.size
+
+
 }
