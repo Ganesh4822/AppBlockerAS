@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.AppsFragment">
+    tools:context=".fragments.BlockedAppsFragment">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -14,13 +14,13 @@
 
         <EditText
             android:id="@+id/search_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Search Apps"
-            android:padding="10dp"
+            android:layout_width="382dp"
+            android:layout_height="42dp"
             android:background="@android:drawable/edit_text"
             android:drawableStart="@android:drawable/ic_menu_search"
-            android:drawablePadding="10dp" />
+            android:drawablePadding="10dp"
+            android:hint="Search Apps"
+            android:padding="10dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
@@ -28,4 +28,5 @@
             android:layout_height="match_parent"
             android:layout_marginTop="10dp" />
     </LinearLayout>
+
 </FrameLayout>

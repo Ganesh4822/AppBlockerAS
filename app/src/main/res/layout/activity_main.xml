@@ -34,7 +34,7 @@
         <!-- Fragment container to switch between fragments -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment"
-            android:name="com.example.appblocker.AppsFragment"
+            android:name="com.example.appblocker.fragments.BlockingFragment"
             android:layout_width="match_parent"
             android:layout_height="641dp"
             android:layout_weight="1"

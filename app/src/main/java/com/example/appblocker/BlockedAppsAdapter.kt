@@ -9,8 +9,6 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.appblocker.AppsFragment
-import com.example.appblocker.MainActivity
 import com.example.appblocker.R
 
 class BlockedAppsAdapter(
@@ -76,6 +74,4 @@ class BlockedAppsAdapter(
     }
 
     override fun getItemCount() = appList.size
-
-
 }

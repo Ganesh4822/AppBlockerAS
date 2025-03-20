@@ -1,16 +1,13 @@
 package com.example.appblocker
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
-import android.widget.Button
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.appblocker.fragments.AnalyticsFragment
+import com.example.appblocker.fragments.AppsFragment
+import com.example.appblocker.fragments.BlockingFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
@@ -66,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
             when (item.itemId) {
                 R.id.nav_apps -> loadFragment(AppsFragment())
-                R.id.nav_schedules -> loadFragment(SchedulesFragment())
+                //R.id.nav_schedules -> loadFragment(SchedulesFragment())
                 R.id.nav_analytics -> loadFragment(AnalyticsFragment())
             }
             true

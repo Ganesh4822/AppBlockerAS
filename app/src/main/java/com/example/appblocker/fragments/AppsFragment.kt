@@ -1,4 +1,4 @@
-package com.example.appblocker
+package com.example.appblocker.fragments
 
 import android.app.Activity
 import android.content.Intent
@@ -17,6 +17,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appblocker.BlockingOptionsActivity
+import com.example.appblocker.R
 import com.yourpackage.BlockedAppsAdapter
 
 
