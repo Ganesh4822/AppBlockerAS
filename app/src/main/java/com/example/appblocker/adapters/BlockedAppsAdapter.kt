@@ -1,4 +1,4 @@
-package com.yourpackage
+package com.example.appblocker.adapters
 
 import android.content.Context
 import android.content.pm.ApplicationInfo

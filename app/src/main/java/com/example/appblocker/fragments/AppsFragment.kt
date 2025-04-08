@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appblocker.BlockingOptionsActivity
 import com.example.appblocker.R
-import com.yourpackage.BlockedAppsAdapter
+import com.example.appblocker.adapters.BlockedAppsAdapter
 
 
 class AppsFragment : Fragment() {

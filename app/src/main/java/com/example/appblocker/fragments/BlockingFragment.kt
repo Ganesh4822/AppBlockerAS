@@ -12,10 +12,9 @@ import android.widget.EditText
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appblocker.R
-import com.yourpackage.BlockedAppsAdapter
+import com.example.appblocker.adapters.BlockedAppsAdapter
 
 /**
  * A simple [Fragment] subclass.
