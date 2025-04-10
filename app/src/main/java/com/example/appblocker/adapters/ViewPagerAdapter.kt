@@ -15,5 +15,4 @@ class ViewPagerAdapter(fm: FragmentManager, lifecycle: Lifecycle) :
     override fun createFragment(position: Int): Fragment {
         return if (position == 0) AppsFragment() else BlockedAppsFragment()
     }
-
 }

@@ -6,23 +6,19 @@
     android:orientation="horizontal"
     android:padding="10dp">
 
-
     <ImageView
-        android:id="@+id/imgAppIcon"
+        android:id="@+id/appIcon"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:src="@drawable/ic_app_placeholder"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/appName"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_marginStart="10dp"
         android:text="App Name"
-        android:textSize="16sp" />
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/scheduleTextView"
@@ -34,14 +30,8 @@
         android:visibility="gone"
         android:layout_marginTop="4dp"/>
 
-
     <CheckBox
         android:id="@+id/checkBox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <ImageView
-        android:id="@+id/appIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 </LinearLayout>

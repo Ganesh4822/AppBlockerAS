@@ -57,12 +57,12 @@ class MainActivity : AppCompatActivity() {
 //            }
 //        }
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        loadFragment(AppsFragment())
+        loadFragment(BlockingFragment())
 
         bottomNavigationView.setOnItemSelectedListener { item ->
 
             when (item.itemId) {
-                R.id.nav_apps -> loadFragment(AppsFragment())
+                R.id.nav_apps -> loadFragment(BlockingFragment())
                 //R.id.nav_schedules -> loadFragment(SchedulesFragment())
                 R.id.nav_analytics -> loadFragment(AnalyticsFragment())
             }

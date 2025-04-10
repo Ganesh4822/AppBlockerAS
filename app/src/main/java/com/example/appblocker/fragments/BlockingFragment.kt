@@ -1,20 +1,14 @@
 package com.example.appblocker.fragments
 
-import android.app.Activity
-import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
-import com.example.appblocker.R
-import com.example.appblocker.adapters.BlockedAppsAdapter
+import com.example.appblocker.adapters.ViewPagerAdapter
+import com.example.appblocker.databinding.FragmentBlockingBinding
+import com.example.appblocker.utils.AppUtils
+import com.google.android.material.tabs.TabLayoutMediator
 
 /**
  * A simple [Fragment] subclass.
@@ -22,33 +16,26 @@ import com.example.appblocker.adapters.BlockedAppsAdapter
  * create an instance of this fragment.
  */
 class BlockingFragment : Fragment() {
-    private lateinit var searchBar : EditText
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: BlockedAppsAdapter
-    private lateinit var appList: List<ApplicationInfo>
-    private lateinit var appListNames: List<String>
-    private lateinit var tabItem: MenuItem
-    private lateinit var scheduleActivityLauncher: ActivityResultLauncher<Intent>
+
+    private lateinit var binding: FragmentBlockingBinding
+    private lateinit var viewPagerAdapter: ViewPagerAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         // Inflate the layout for this fragment
-        val view =  inflater.inflate(R.layout.fragment_blocking, container, false)
-        searchBar = view.findViewById<EditText>(R.id.blocking_search_bar)
-//        recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view_blocking_apps)
 
+        binding = FragmentBlockingBinding.inflate(inflater, container, false)
+        viewPagerAdapter = ViewPagerAdapter(childFragmentManager, lifecycle)
+        binding.viewPager.adapter = viewPagerAdapter
 
-       // recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        scheduleActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                adapter.notifyDataSetChanged() // ✅ Refresh UI when returning from ScheduleActivity
-            }
-        }
-
-        return view
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = if (position == 0) "All Apps (${AppUtils.getAllApps(requireContext()).size})"
+            else "Blocked Apps"
+        }.attach()
+        return binding.root
     }
 
 
