@@ -3,13 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-    <uses-permission android:name="android.permission.queries"/>
+    <uses-permission android:name="android.permission.queries" />
+
     <queries>
         <intent>
-            <action android:name="android.intent.action.MAIN"/>
-            <category android:name="android.intent.category.LAUNCHER"/>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
         </intent>
     </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -20,6 +23,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppBlocker"
         tools:targetApi="31">
+        <activity
+            android:name=".AppDetailActivity"
+            android:exported="false" />
 
         <service
             android:name=".AppBlockerService"
@@ -31,7 +37,7 @@
 
             <meta-data
                 android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config"/>
+                android:resource="@xml/accessibility_service_config" />
         </service>
 
         <activity
@@ -39,26 +45,23 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppBlocker">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".ScheduleActivity"
-            android:theme="@style/Theme.AppBlocker"/>
-
-        <activity android:name=".BlockingOptionsActivity"
-            android:theme="@style/Theme.AppBlocker"/>
-
+        <activity
+            android:name=".ScheduleActivity"
+            android:theme="@style/Theme.AppBlocker" />
+        <activity
+            android:name=".BlockingOptionsActivity"
+            android:theme="@style/Theme.AppBlocker" />
         <activity
             android:name=".BlockScreenActivity"
-            android:launchMode="singleTask"
             android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
-        </activity>
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"></activity>
     </application>
 
 </manifest>

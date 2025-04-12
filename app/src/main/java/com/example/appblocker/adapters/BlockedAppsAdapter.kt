@@ -21,9 +21,7 @@ class BlockedAppsAdapter(
     private var blockedApps = sharedPreferences.getStringSet("blocked_apps", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val appName: TextView = view.findViewById(R.id.appName)
-//        val appIcon: ImageView = view.findViewById(R.id.appIcon)
         val scheduleTextView: TextView = view.findViewById(R.id.scheduleTextView)
-        val checkBox: CheckBox = view.findViewById(R.id.checkBox)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -47,7 +45,6 @@ class BlockedAppsAdapter(
             onAppClick(app) // Pass the clicked app to the listener
         }
         //Old version to block the apps that are marked by the checkmark.
-        holder.checkBox.setOnCheckedChangeListener(null)
         if(schedule != null){
             val formattedSchedule = schedule.replace("|", " (") + ")"
             holder.scheduleTextView.text = "blocked: $formattedSchedule"
@@ -57,20 +54,9 @@ class BlockedAppsAdapter(
             holder.scheduleTextView.visibility = View.GONE
         }
         val isBlocked = blockedApps.contains(app.packageName)
-        holder.checkBox.isChecked = isBlocked
 
         //holder.appIcon.setImageDrawable(app.icon)
         Log.d("AppCheck", "Blocked apps: $blockedApps)")
-        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                blockedApps.add(app.packageName)
-                Log.d("AppCheck", "Detected: $app)")
-            } else {
-                blockedApps.remove(app.packageName)
-            }
-            // Save updated blocked apps list
-            sharedPreferences.edit().putStringSet("blocked_apps", blockedApps).apply()
-        }
     }
 
     override fun getItemCount() = appList.size

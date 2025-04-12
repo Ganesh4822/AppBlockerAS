@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView.setOnItemSelectedListener { item ->
 
             when (item.itemId) {
-                R.id.nav_apps -> loadFragment(BlockingFragment())
+                R.id.nav_blocking -> loadFragment(BlockingFragment())
                 //R.id.nav_schedules -> loadFragment(SchedulesFragment())
                 R.id.nav_analytics -> loadFragment(AnalyticsFragment())
             }

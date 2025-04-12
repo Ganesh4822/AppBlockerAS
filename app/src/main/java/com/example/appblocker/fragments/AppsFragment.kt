@@ -1,32 +1,22 @@
 package com.example.appblocker.fragments
 
-import android.app.Activity
-import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.widget.addTextChangedListener
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.appblocker.BlockingOptionsActivity
 import com.example.appblocker.R
 import com.example.appblocker.adapters.AppsAdapter
-import com.example.appblocker.adapters.BlockedAppsAdapter
 import com.example.appblocker.databinding.FragmentAppsBinding
+import com.example.appblocker.models.AppModel
 import com.example.appblocker.utils.AppUtils
 
 
-//class AppsFragment : Fragment() {
-//    // TODO: Rename and change types of parameters
+//class AppsFragment : Fragment(){
+//
 //    data class AppInfo(val name: String, val packageName: String, val icon: Drawable) {
 //
 //    }
@@ -68,12 +58,12 @@ import com.example.appblocker.utils.AppUtils
 //        Log.d("AppCheck", "adapter loaded successfully")
 //        recyclerView.adapter = adapter
 //
-////        searchBar.addTextChangedListener { text ->
-////            val filteredList = appList.filter { requireContext().packageManager.getApplicationLabel(it)
-////                .toString().contains(text.toString(), ignoreCase = true) }
-////
-////            adapter.updateList(filteredList)
-////        }
+//        searchBar.addTextChangedListener { text ->
+//            val filteredList = appList.filter { requireContext().packageManager.getApplicationLabel(it)
+//                .toString().contains(text.toString(), ignoreCase = true) }
+//
+//            adapter.updateList(filteredList)
+//        }
 //
 //        return view
 //    }
@@ -92,6 +82,7 @@ class AppsFragment : Fragment() {
 
     private lateinit var binding: FragmentAppsBinding
     private lateinit var adapter: AppsAdapter
+    private var apps: List<AppModel> = listOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -99,12 +90,27 @@ class AppsFragment : Fragment() {
     ): View {
         binding = FragmentAppsBinding.inflate(inflater, container, false)
 
-        val allApps = AppUtils.getAllApps(requireContext()) // Fetch all installed apps
-        adapter = AppsAdapter(allApps)
+        //apps = AppUtils.getAllApps(requireContext())
+        adapter = AppsAdapter(apps)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.adapter = adapter
 
         return binding.root
+    }
+
+    fun setAppList(apps: List<AppModel>) {
+        this.apps = apps
+        if (::adapter.isInitialized) {
+            adapter = AppsAdapter(apps)
+            binding.recyclerView.adapter = adapter
+        }
+    }
+
+    fun filter(query: String) {
+        if (::adapter.isInitialized) {
+            adapter.filter(query)
+        }
     }
 }

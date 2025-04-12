@@ -11,6 +11,8 @@ import com.example.appblocker.models.AppModel
 
 class AppsAdapter(private val apps: List<AppModel>) :
     RecyclerView.Adapter<AppsAdapter.AppViewHolder>() {
+    private lateinit var onItemClickListener: (AppModel) -> Unit
+    private var filteredApps: List<AppModel> = apps
 
     class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val appIcon: ImageView = itemView.findViewById(R.id.appIcon)
@@ -23,10 +25,27 @@ class AppsAdapter(private val apps: List<AppModel>) :
     }
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
-        val app = apps[position]
+        val app = filteredApps[position]
         holder.appName.text = app.appName
         holder.appIcon.setImageDrawable(app.icon)
     }
 
-    override fun getItemCount(): Int = apps.size
+    override fun getItemCount(): Int = filteredApps.size
+
+    fun filter(query: String) {
+        filteredApps = if (query.isEmpty()) {
+            apps
+        } else {
+            apps.filter {
+                it.appName.contains(query, ignoreCase = true)
+            }
+        }
+        notifyDataSetChanged()
+    }
+
+    fun setOnItemClickListener(listener: (AppModel) -> Unit) {
+        this.onItemClickListener = listener
+    }
+
+
 }
