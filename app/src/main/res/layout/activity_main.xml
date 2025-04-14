@@ -1,53 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
-<!--    <Button-->
-<!--        android:id="@+id/enableServiceButton"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Enable Accessibility Service"-->
-<!--        android:layout_marginTop="20dp"/>-->
+    android:layout_height="match_parent">
 
-<!--    <TextView-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Select Apps to Block"-->
-<!--        android:textSize="18sp"-->
-<!--        android:textStyle="bold"-->
-<!--        android:layout_gravity="center_horizontal"-->
-<!--        android:paddingBottom="10dp"/>-->
-
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/recyclerViewApps"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:nestedScrollingEnabled="false"/>-->
-
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <!-- NavHostFragment must use the AndroidX Navigation class -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:navGraph="@navigation/nav_graph"
+        app:defaultNavHost="true" />
 
-        <!-- Fragment container to switch between fragments -->
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/nav_host_fragment"
-            android:name="com.example.appblocker.fragments.BlockingFragment"
-            android:layout_width="match_parent"
-            android:layout_height="641dp"
-            android:layout_weight="1"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_graph" />
-
-        <!-- Bottom Navigation View -->
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_navigation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            app:menu="@menu/bottom_nav_menu" />
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-</LinearLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:menu="@menu/bottom_nav_menu" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

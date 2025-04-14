@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.appblocker.R
@@ -83,6 +84,7 @@ class AppsFragment : Fragment() {
     private lateinit var binding: FragmentAppsBinding
     private lateinit var adapter: AppsAdapter
     private var apps: List<AppModel> = listOf()
+    private var onAppClick: ((AppModel) -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -90,20 +92,20 @@ class AppsFragment : Fragment() {
     ): View {
         binding = FragmentAppsBinding.inflate(inflater, container, false)
 
-        //apps = AppUtils.getAllApps(requireContext())
-        adapter = AppsAdapter(apps)
-
+        adapter = AppsAdapter(apps) { app ->
+            onAppClick?.invoke(app) // Delegate click back to parent (BlockingFragment)
+        }
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.setHasFixedSize(true)
-        binding.recyclerView.adapter = adapter
 
+        binding.recyclerView.setHasFixedSize(true)
         return binding.root
     }
 
-    fun setAppList(apps: List<AppModel>) {
+    fun setAppList(apps: List<AppModel>,onItemClick: (AppModel) -> Unit) {
         this.apps = apps
+        this.onAppClick = onItemClick
         if (::adapter.isInitialized) {
-            adapter = AppsAdapter(apps)
+            adapter = AppsAdapter(apps,onItemClick)
             binding.recyclerView.adapter = adapter
         }
     }

@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:app="http://schemas.android.com/apk/res-auto"
-             android:id="@+id/nav_graph.xml">
+             android:id="@+id/nav_graph.xml"
+             app:startDestination="@id/blockingFragment">
+
+    <fragment
+        android:id="@+id/blockingFragment"
+        android:name="com.example.appblocker.fragments.BlockingFragment"
+        android:label="Blocking page">
+        <action
+            android:id="@+id/action_blockingFragment_to_appDetailFragment"
+            app:destination="@id/appDetailFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/appDetailFragment"
+        android:name="com.example.appblocker.fragments.AppDetailsFragment"
+        android:label="App Detail">
+        <argument
+            android:name="APP_NAME"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/analyticsFragment"
+        android:name="com.example.appblocker.fragments.AnalyticsFragment"
+        android:label="Analytics" />
 
 </navigation>

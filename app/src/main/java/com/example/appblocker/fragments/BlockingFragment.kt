@@ -1,12 +1,15 @@
 package com.example.appblocker.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.findNavController
+import com.example.appblocker.R
 import com.example.appblocker.adapters.ViewPagerAdapter
 import com.example.appblocker.databinding.FragmentBlockingBinding
 import com.example.appblocker.models.AppsViewModel
@@ -34,6 +37,7 @@ class BlockingFragment : Fragment() {
     ): View? {
 
         // Inflate the layout for this fragment
+        Log.d("BlockingFragment", "onCreateView called")
         binding = FragmentBlockingBinding.inflate(inflater, container, false)
 
         allAppsFragment = AppsFragment()
@@ -50,8 +54,17 @@ class BlockingFragment : Fragment() {
         appsViewModel.loadApps()
 
         appsViewModel.allApps.observe(viewLifecycleOwner) { list ->
-            allAppsFragment.setAppList(list)
+            allAppsFragment.setAppList(list) { app ->
+                val bundle = Bundle().apply {
+                    putString("APP_NAME", app.appName)
+                }
+                Log.d("NavDebug", "App clicked: ${app.appName}")
+                requireActivity().findNavController(R.id.nav_host_fragment).navigate(
+                    R.id.action_blockingFragment_to_appDetailFragment, bundle
+                )
+            }
         }
+
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?) = false

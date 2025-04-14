@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.appblocker.fragments.AnalyticsFragment
 import com.example.appblocker.fragments.AppsFragment
 import com.example.appblocker.fragments.BlockingFragment
@@ -56,15 +57,18 @@ class MainActivity : AppCompatActivity() {
 //
 //            }
 //        }
+        val navController = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment)
+            ?.findNavController()
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        loadFragment(BlockingFragment())
+//        loadFragment(BlockingFragment())
 
         bottomNavigationView.setOnItemSelectedListener { item ->
 
             when (item.itemId) {
-                R.id.nav_blocking -> loadFragment(BlockingFragment())
+                R.id.nav_blocking -> navController?.navigate(R.id.blockingFragment)
                 //R.id.nav_schedules -> loadFragment(SchedulesFragment())
-                R.id.nav_analytics -> loadFragment(AnalyticsFragment())
+                R.id.nav_analytics -> navController?.navigate(R.id.analyticsFragment)
             }
             true
         }

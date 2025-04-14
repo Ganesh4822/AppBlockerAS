@@ -36,7 +36,7 @@ androidx-navigation = {module = "androidx.navigation:navigation-fragment-ktx", v
 androidx-navigation-ui = {module = "androidx.navigation:navigation-ui-ktx", version = "2.8.9"}
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version = "v3.1.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

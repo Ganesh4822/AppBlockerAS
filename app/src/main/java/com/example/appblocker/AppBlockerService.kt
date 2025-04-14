@@ -14,7 +14,6 @@ import android.view.accessibility.AccessibilityEvent
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.List
 
 class AppBlockerService : AccessibilityService() {
 
