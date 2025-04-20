@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">BlockMaster</string>
+    <string name="blocking">Blocking</string>
+    <string name="analytics">Analytics</string>
+    <string name="search_app">Search app</string>
+    <string name="search">Search</string>
+    <string name="all_apps_count">All Apps (%d)</string>
+    <string name="blocked_apps_count">Blocked Apps (%d)</string>
+    <string name="title_activity_blocking">Blocking</string>
+    <string name="no_apps_found">No apps found.</string>
+    <string name="configure">Configure</string>
+</resources>
