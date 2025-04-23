@@ -1,4 +1,5 @@
 <resources>
+<!--    BlockingScreen-->
     <string name="app_name">BlockMaster</string>
     <string name="blocking">Blocking</string>
     <string name="analytics">Analytics</string>
@@ -9,4 +10,17 @@
     <string name="title_activity_blocking">Blocking</string>
     <string name="no_apps_found">No apps found.</string>
     <string name="configure">Configure</string>
+    <string name="grouped_blocks_count">Grouped Blocks (%d)</string>
+    <string name="individual_blocks_count">Individual Blocks (%d)</string>
+    <string name="focus_timer">Focus Timer</string>
+    <string name="no_groups_yet">No groups yet</string>
+    <string name="group_description">Group apps by category like social, gaming, or by routines like work hours.</string>
+    <string name="create_a_group">Create a Group</string>
+    <string name="no_apps_yet">No apps yet</string>
+    <string name="select_app">Select App</string>
+    <string name="individual_blocks_placeholder">List of individually blocked apps will appear here.</string>
+
+<!--    Create groups screen-->
+    <string name="select_apps">Select Apps</string>
+    <string name="back">Back</string>
 </resources>
