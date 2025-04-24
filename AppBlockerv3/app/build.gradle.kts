@@ -59,4 +59,5 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.gson)
 }

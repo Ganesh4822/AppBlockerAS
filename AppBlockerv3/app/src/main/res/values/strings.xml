@@ -23,4 +23,15 @@
 <!--    Create groups screen-->
     <string name="select_apps">Select Apps</string>
     <string name="back">Back</string>
+
+<!--    Create group screen-->
+    <string name="group">Group</string>
+    <string name="name">Name</string>
+    <string name="apps_count">Apps (%d)</string>
+    <string name="add_apps">Add Apps</string>
+    <string name="block_on_schedule">Block on a Schedule</string>
+    <string name="add_schedule">Add Schedule</string>
+    <string name="daily_usage_limit">Daily Usage Limit</string>
+    <string name="add_usage_limit">Add Usage Limit</string>
+    <string name="save">Save</string>
 </resources>

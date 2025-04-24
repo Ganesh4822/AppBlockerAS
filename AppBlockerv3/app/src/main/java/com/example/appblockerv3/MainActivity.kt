@@ -3,26 +3,22 @@ package com.example.appblockerv3
 import androidx.activity.ComponentActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.appblockerv3.ui.screens.BlockingScreen
-import com.example.appblockerv3.ui.theme.AppBlockerV3Theme
-import com.example.appblockerv3.R
+import com.example.appblockerv3.ui.screens.CreateGroupScreen
 import com.example.appblockerv3.ui.screens.SelectAppsScreen
-import org.jetbrains.annotations.Blocking
+import com.google.gson.Gson
 
 @Composable
 fun AnalyticsScreen() {
@@ -34,7 +30,7 @@ fun FocusTimerScreen() {
     Text(text = "Focus Timer Screen") // Placeholder
 }
 @Composable
-fun BlockingScreen(navController: NavHostController) {
+fun BlockingScreenNav(navController: NavHostController) {
     BlockingScreen(
         onNavigateToAnalytics = { navController.navigate("analytics") },
         onNavigateToFocusTimer = { navController.navigate("focus_timer") },
@@ -42,12 +38,40 @@ fun BlockingScreen(navController: NavHostController) {
     )
 }
 @Composable
-fun SelectAppsScreen(navController: NavHostController, onCreateGroup: (List<String>) -> Unit) {
+fun SelectAppsScreenNav(navController: NavHostController) {
     SelectAppsScreen(
         onNavigateBack = { navController.popBackStack() }, // Go back to the previous screen
-        onCreateGroup = onCreateGroup
+        onCreateGroup = { selectedAppPackageNames ->
+            val gson = Gson()
+            val selectedAppsJson = gson.toJson(selectedAppPackageNames)
+            navController.navigate("create_group/$selectedAppsJson")
+        }
     )
 }
+
+
+@Composable
+fun CreateGroupScreenNav(navController: NavHostController, selectedAppsJson: String?) {
+    val gson = Gson()
+    val selectedAppPackageNames = remember(selectedAppsJson) {
+        if (selectedAppsJson != null) {
+            gson.fromJson<List<String>>(selectedAppsJson, List::class.java) as List<String>
+        } else {
+            emptyList()
+        }
+    }
+
+    CreateGroupScreen(
+        onNavigateBack = { navController.popBackStack() },
+        selectedAppPackageNames = selectedAppPackageNames,
+        onSaveGroup = { groupName, appList ->
+            println("Group Name: $groupName, Apps to save: $appList")
+            // TODO: Implement the logic to save the group name and app list
+            navController.popBackStack() // Navigate back after saving
+        }
+    )
+}
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +85,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "blocking") {
                         composable("blocking") {
-                            BlockingScreen(navController = navController)
+                            BlockingScreenNav(navController = navController)
                         }
                         composable("analytics") {
                             AnalyticsScreen()
@@ -70,16 +94,17 @@ class MainActivity : ComponentActivity() {
                             FocusTimerScreen()
                         }
                         composable("select_apps") {
-                            // Define how to handle the list of selected apps
-                            val onGroupCreated: (List<String>) -> Unit = { selectedAppPackageNames ->
-                                println("Selected apps for group: $selectedAppPackageNames")
-                                // TODO: Implement the logic to create and save the group
-                                // After creating the group, you might want to navigate back
-                                navController.popBackStack()
-                            }
-                            SelectAppsScreen(
-                                navController = navController, onCreateGroup = onGroupCreated
+                            SelectAppsScreenNav(
+                                navController = navController
                             )
+                        }
+                        //Handling the selected app list to be passed to the create group screen
+                        composable(
+                            "create_group/{selectedAppsJson}",
+                            arguments = listOf(navArgument("selectedAppsJson") { nullable = true })
+                        ) { backStackEntry ->
+                            val selectedAppsJson = backStackEntry.arguments?.getString("selectedAppsJson")
+                            CreateGroupScreenNav(navController = navController, selectedAppsJson = selectedAppsJson)
                         }
                     }
                 }

@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -72,7 +74,6 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -
         allApps.filter { it.appName.contains(searchQuery.value, ignoreCase = true) }
     }
 
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -105,7 +106,9 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -
                 onValueChange = { searchQuery.value = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .background(MaterialTheme.colors.background,
+                        CircleShape),
                 placeholder = { Text(stringResource(R.string.search_app)) },
                 trailingIcon = { Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search)) }
             )
