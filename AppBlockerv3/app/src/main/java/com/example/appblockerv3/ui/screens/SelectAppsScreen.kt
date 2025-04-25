@@ -1,6 +1,7 @@
 package com.example.appblockerv3.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -24,6 +25,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appblockerv3.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class SelectableAppInfo(
     val packageName: String,

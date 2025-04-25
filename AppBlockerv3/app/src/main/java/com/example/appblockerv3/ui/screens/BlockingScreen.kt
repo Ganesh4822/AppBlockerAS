@@ -28,9 +28,7 @@ fun BlockingScreen(onNavigateToAnalytics: () -> Unit, onNavigateToFocusTimer: ()
         topBar = {
             TopAppBar(title = { Text(stringResource(R.string.blocking)) })
         },
-        /*
-            Added bottom navigation menue to navigate to analytics and focus timer
-         */
+        //Bottom navigation menue
         bottomBar = {
             BottomNavigation {
                 BottomNavigationItem(
