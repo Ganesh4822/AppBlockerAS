@@ -34,4 +34,15 @@
     <string name="daily_usage_limit">Daily Usage Limit</string>
     <string name="add_usage_limit">Add Usage Limit</string>
     <string name="save">Save</string>
+
+<!--    Block 0n a schedule sheet-->
+<!--    <string name="block_on_schedule">Block on a Schedule</string>-->
+    <string name="close">Close</string>
+    <string name="select_block_days">Select block days</string>
+    <string name="all_day">All day</string>
+    <string name="time_range">Time Range</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="cancel">Cancel</string>
+<!--    <string name="save">Save</string>-->
 </resources>
