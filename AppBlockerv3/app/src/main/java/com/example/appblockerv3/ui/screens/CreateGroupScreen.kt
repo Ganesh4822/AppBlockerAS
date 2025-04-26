@@ -37,7 +37,6 @@ import java.time.format.DateTimeFormatter
 
 data class AppData(val packageName: String, val appName: String, val icon: Drawable?)
 
-
 @Composable
 fun RoundedLabelInput() {
     var groupName by remember { mutableStateOf("") }
@@ -45,7 +44,7 @@ fun RoundedLabelInput() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 3.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))// To only round the top corners
             .background(Color(0xFFE8EAFF) //Light purple
             )
     ) {
@@ -60,21 +59,26 @@ fun RoundedLabelInput() {
             value = groupName,
             onValueChange = { groupName = it },
             modifier = Modifier.fillMaxWidth()
+                 .background(Color.White)
+
         )
     }
 }
 
 @Composable
 fun AppsSection(selectedAppsInfo :List<AppData> ) {
+
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFE8EAFF)) // Light purple
-            .padding(12.dp)
+        modifier = Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+            .background(Color(0xFFE8EAFF))
     ) {
+        // Header (Light Purple Background)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFE8EAFD)) // Light Purple
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -83,19 +87,32 @@ fun AppsSection(selectedAppsInfo :List<AppData> ) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_apps))
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
 
-        LazyRow {
-            items(selectedAppsInfo) { appData ->
-                val iconBitmap = remember(appData.icon) { appData.icon?.toBitmap()?.asImageBitmap() }
-                if (iconBitmap != null) {
-                    Image(
-                        bitmap = iconBitmap,
-                        contentDescription = appData.appName,
-                        modifier = Modifier.size(48.dp).padding(end = 8.dp)
-                    )
-                } else {
-                    Icon(Icons.Filled.Block, contentDescription = appData.appName, modifier = Modifier.size(48.dp).padding(end = 8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .border(
+                    width = 1.dp,
+                    color = Color.LightGray, // Border color
+                )
+        ) {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                items(selectedAppsInfo) { appData ->
+                    val iconBitmap = remember(appData.icon) { appData.icon?.toBitmap()?.asImageBitmap() }
+                    if (iconBitmap != null) {
+                        Image(
+                            bitmap = iconBitmap,
+                            contentDescription = appData.appName,
+                            modifier = Modifier.size(48.dp).padding(end = 8.dp)
+                        )
+                    } else {
+                        Icon(Icons.Filled.Block, contentDescription = appData.appName, modifier = Modifier.size(48.dp).padding(end = 8.dp))
+                    }
                 }
             }
         }
@@ -129,7 +146,6 @@ fun CreateGroupScreen(
         }
     }
 
-    var showScheduleBottomSheet by remember { mutableStateOf(false) }
     val scheduleBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
@@ -379,13 +395,16 @@ fun BlockOnScheduleBottomSheet(
                     style = MaterialTheme.typography.subtitle1
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically
+                    ,horizontalArrangement = Arrangement.SpaceEvenly) {
                     Text(stringResource(R.string.start_time))
-                    Spacer(modifier = Modifier.width(200.dp))
+                    Spacer(modifier = Modifier.width(160.dp))
                     Text(stringResource(R.string.end_time))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically
+                ,horizontalArrangement = Arrangement.SpaceEvenly) {
+
                     TextButton(onClick = { /* TODO: Implement time picker for start time */ },
                         modifier = Modifier.background(Color.LightGray)) {
                         Text(
@@ -393,9 +412,11 @@ fun BlockOnScheduleBottomSheet(
                                 ?: "--:-- --", color = Color.Black
                         )
                     }
-                    Spacer(modifier = Modifier.width(80.dp))
+
+                    Spacer(modifier = Modifier.width(50.dp))
                     Text("→", fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(80.dp))
+                    Spacer(modifier = Modifier.width(50.dp))
+
                     TextButton(onClick = { /* TODO: Implement time picker for end time */ },
                         modifier = Modifier.background(Color.LightGray)) {
                         Text(

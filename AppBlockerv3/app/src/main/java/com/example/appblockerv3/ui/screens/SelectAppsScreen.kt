@@ -91,7 +91,8 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -
                 onClick = { onCreateGroup(selectedApps.toList()) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                enabled = selectedApps.isNotEmpty()
             ) {
                 Text(stringResource(R.string.create_a_group))
             }
