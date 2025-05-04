@@ -45,4 +45,9 @@
     <string name="end_time">End Time</string>
     <string name="cancel">Cancel</string>
 <!--    <string name="save">Save</string>-->
+
+    <string name="set_limit">Set Limit</string>
+    <string name="hrs">Hrs</string>
+    <string name="mins">Mins</string>
+
 </resources>
