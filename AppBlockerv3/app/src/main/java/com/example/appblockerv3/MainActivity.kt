@@ -1,8 +1,11 @@
 package com.example.appblockerv3
 
+import android.os.Build
 import androidx.activity.ComponentActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -50,6 +53,7 @@ fun SelectAppsScreenNav(navController: NavHostController) {
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateGroupScreenNav(navController: NavHostController, selectedAppsJson: String?) {
     val gson = Gson()
@@ -64,16 +68,20 @@ fun CreateGroupScreenNav(navController: NavHostController, selectedAppsJson: Str
     CreateGroupScreen(
         onNavigateBack = { navController.popBackStack() },
         selectedAppPackageNames = selectedAppPackageNames,
-        onSaveGroup = { groupName, appList ->
-            println("Group Name: $groupName, Apps to save: $appList")
-            // TODO: Implement the logic to save the group name and app list
-            navController.popBackStack() // Navigate back after saving
+        onSaveGroup = { groupName, appList, schedules, usageLimitHours, usageLimitMinutes ->
+            Log.d("MainActivity", "Group Name: $groupName")
+            Log.d("MainActivity", "App List: $appList")
+            Log.d("MainActivity", "Schedules: $schedules")
+            Log.d("MainActivity", "Usage Limit: $usageLimitHours hours and $usageLimitMinutes minutes")
+            // TODO: Implement logic to save this data in DB
+            navController.popBackStack()
         }
     )
 }
 
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

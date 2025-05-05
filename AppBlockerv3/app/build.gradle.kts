@@ -60,4 +60,6 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.gson)
+    implementation(libs.androidx.room.runtime)
+
 }

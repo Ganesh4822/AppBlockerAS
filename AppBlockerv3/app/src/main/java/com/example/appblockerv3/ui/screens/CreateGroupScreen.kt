@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appblockerv3.R
+import com.example.appblockerv3.data.AppSchedule
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -114,7 +115,13 @@ This screen also contains the block on schedule section and daily usage limit bu
 fun CreateGroupScreen(
     onNavigateBack: () -> Unit,
     selectedAppPackageNames: List<String>,
-    onSaveGroup: (String, List<String>) -> Unit // Updated onSaveGroup
+    onSaveGroup: (
+        groupName: String,
+        appList: List<String>,
+        schedules: List<AppSchedule>, // we will save the list of schdules
+        usageLimitHours: Int,
+        usageLimitMinutes: Int
+    ) -> Unit // Updated onSaveGroup
 ) {
     val context = LocalContext.current
     val packageManager = context.packageManager
@@ -144,6 +151,9 @@ fun CreateGroupScreen(
     var endTime by remember { mutableStateOf<LocalTime?>(LocalTime.of(17, 0)) }
     var isAllDay by remember { mutableStateOf(false) }
 
+    //To save the list of schedules
+    val savedSchedules = remember { mutableStateListOf<AppSchedule>() }
+
     // State for Daily Usage Limit
     var showUsageLimitBottomSheet by remember { mutableStateOf(false) }
     val usageLimitBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -160,6 +170,18 @@ fun CreateGroupScreen(
                     startTime = start
                     endTime = end
                     isAllDay = allDay
+                    val schedule = AppSchedule(
+                        days = days.joinToString(","),
+                        startTime = start?.format(DateTimeFormatter.ofPattern("hh:mm a")),
+                        endTime = end?.format(DateTimeFormatter.ofPattern("hh:mm a")),
+                        isAllDay = allDay
+                    )
+                    if (savedSchedules.size < 2) { // Limit to two schedules
+                        savedSchedules.add(schedule)
+                    } else {
+                        // Optionally show a message to the user that they can only add two schedules
+                        println("Maximum of two schedules allowed per group.")
+                    }
                     scope.launch { scheduleBottomSheetState.hide() }
                 },
                 selectedDays = selectedDays,
@@ -198,7 +220,12 @@ fun CreateGroupScreen(
                 bottomBar = {
                     Button(
                         onClick = {
-                            onSaveGroup(groupName, selectedAppPackageNames)
+                            onSaveGroup(groupName
+                                ,selectedAppPackageNames
+                                ,savedSchedules
+                                ,usageLimitHours
+                                ,usageLimitMinutes
+                                )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -216,7 +243,7 @@ fun CreateGroupScreen(
                         .padding(paddingValues)
                         .padding(16.dp)
                 ) {
-                    // Name Field
+                    // Name of the group
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -266,47 +293,47 @@ fun CreateGroupScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         //show selected days and time range Here
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.White)
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.LightGray, // Border color
-                                )
-                        ){
-                            if (selectedDays.isNotEmpty()) {
+                        if (savedSchedules.isNotEmpty()) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White)
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.LightGray,
+                                    )
+                                    .padding(8.dp)
+                            ) {
                                 Text(
-                                    text = "Blocking on: ${selectedDays.joinToString(" ") { day ->
-                                        when (day) {
-                                            1 -> "M"
-                                            2 -> "T"
-                                            3 -> "W"
-                                            4 -> "T"
-                                            5 -> "F"
-                                            6 -> "S"
-                                            7 -> "S"
-                                            else -> ""
-                                        }
-                                    }}",
-                                    style = MaterialTheme.typography.body2,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                    "Schedules:",
+                                    style = MaterialTheme.typography.subtitle1,
+                                    modifier = Modifier.padding(bottom = 4.dp)
                                 )
+                                savedSchedules.forEachIndexed { index, schedule ->
+                                    ScheduleItem(
+                                        schedule = schedule,
+                                        onDelete = { savedSchedules.removeAt(index) }
+                                    )
+                                }
                             }
-                            if (isAllDay) {
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White)
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.LightGray,
+                                    )
+                                    .padding(8.dp)
+                            ) {
                                 Text(
-                                    text = "All Day",
+                                    "No schedules added.",
                                     style = MaterialTheme.typography.body2,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                            } else if (startTime != null && endTime != null) {
-                                Text(
-                                    text = "Time: ${startTime?.format(DateTimeFormatter.ofPattern("hh:mm a"))} - ${endTime?.format(DateTimeFormatter.ofPattern("hh:mm a"))}",
-                                    style = MaterialTheme.typography.body2
+                                    modifier = Modifier.padding(8.dp)
                                 )
                             }
                         }
-
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -334,7 +361,7 @@ fun CreateGroupScreen(
                                 color = Color.LightGray, // Border color
                             )
                     ){
-                        if (usageLimitHours != 0) {
+                        if (usageLimitHours != 0 || usageLimitMinutes != 0) {
                             Text(
                                 text = "Max : ${usageLimitHours} Hrs ${usageLimitMinutes} Mins",
                                 style = MaterialTheme.typography.body2,
@@ -346,6 +373,39 @@ fun CreateGroupScreen(
             }
         }
 
+    }
+}
+
+@Composable
+fun ScheduleItem(schedule: AppSchedule, onDelete: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        val daysText = schedule.days.split(",").joinToString(" ") { day ->
+            when (day.toInt()) {
+                1 -> "M"
+                2 -> "T"
+                3 -> "W"
+                4 -> "T"
+                5 -> "F"
+                6 -> "S"
+                7 -> "S"
+                else -> ""
+            }
+        }
+        val timeText = if (schedule.isAllDay) "All Day" else "${schedule.startTime} - ${schedule.endTime}"
+
+        Column {
+            Text(text = daysText, style = MaterialTheme.typography.body1)
+            Text(text = timeText, style = MaterialTheme.typography.body2)
+        }
+        IconButton(onClick = onDelete) {
+            Icon(Icons.Filled.Close, contentDescription = "Delete", tint = Color.Red)
+        }
     }
 }
 
@@ -743,6 +803,7 @@ fun TimeLimitPicker(
     }
 }
 
+
 @Composable
 fun NumberPicker(
     values: List<Int>,
@@ -784,3 +845,21 @@ fun NumberPicker(
     }
 }
 
+/*
+Package_name :id
+group_id
+group_name :
+schedule_id : [SHA,SHA]
+usage_limit (minutes)
+*/
+
+/*
+  dm_schedules
+
+  schedule_id : SHA(days,start_time,end_time)
+  days : 1,2,3,4,5
+  start_time :
+  end_time :
+*/
+
+// schedule_id 0 ,days=2,3,4,5,6, startTime=10:00 AM, endTime=07:00 AM
