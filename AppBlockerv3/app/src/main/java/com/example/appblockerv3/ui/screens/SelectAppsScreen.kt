@@ -34,9 +34,17 @@ data class SelectableAppInfo(
     //apps from the App list
 )
 
+/*
+Contains conditional UI based on the isSingleSelection param.
+when isSingleSelection param is false UI loads with the checkboxes
+when isSingleSelection param is true UI loads without the checkboxes.
+ */
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -> Unit) {
+fun SelectAppsScreen(onNavigateBack: () -> Unit
+                     ,onCreateGroup: (List<String>) -> Unit = {}
+                     ,onAppSelected: (String) -> Unit = {},
+                     isSingleSelection: Boolean = false) {
     val context = LocalContext.current
     val packageManager = context.packageManager
     var allApps by remember { mutableStateOf<List<SelectableAppInfo>>(emptyList()) }
@@ -78,7 +86,13 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.select_apps)) },
+                title = {
+                    Text(
+                        text = if (isSingleSelection) stringResource(R.string.select_app_to_block) else stringResource(
+                            R.string.select_apps
+                        )
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -87,14 +101,16 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -
             )
         },
         bottomBar = {
-            Button(
-                onClick = { onCreateGroup(selectedApps.toList()) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                enabled = selectedApps.isNotEmpty()
-            ) {
-                Text(stringResource(R.string.create_a_group))
+            if (!isSingleSelection) {
+                Button(
+                    onClick = { onCreateGroup(selectedApps.toList()) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    enabled = selectedApps.isNotEmpty()
+                ) {
+                    Text(stringResource(R.string.create_a_group))
+                }
             }
         }
     ) { paddingValues ->
@@ -128,15 +144,22 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -
                         onAppSelected = { packageName, isChecked ->
                             val app = allApps.find { it.packageName == packageName }
                             app?.isSelected?.value = isChecked
-                            if (isChecked) {
-                                if (!selectedApps.contains(packageName)) {
-                                    selectedApps.add(packageName)
-                                    Log.d("Appcheck",selectedApps.toString())
+                            if (isSingleSelection) {
+                                if (isChecked) {
+                                    onAppSelected(packageName) // Notify the single app selection
                                 }
                             } else {
-                                selectedApps.remove(packageName)
+                                if (isChecked) {
+                                    if (!selectedApps.contains(packageName)) {
+                                        selectedApps.add(packageName)
+                                        Log.d("Appcheck", selectedApps.toString())
+                                    }
+                                } else {
+                                    selectedApps.remove(packageName)
+                                }
                             }
-                        }
+                        },
+                        isSingleSelection = isSingleSelection
                     )
                     Divider()
                 }
@@ -146,12 +169,20 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit, onCreateGroup: (List<String>) -
 }
 
 @Composable
-fun SelectableAppListItem(appInfo: SelectableAppInfo, onAppSelected: (String, Boolean) -> Unit) {
+fun SelectableAppListItem(appInfo: SelectableAppInfo
+                          ,onAppSelected: (String, Boolean) -> Unit
+                          ,isSingleSelection: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { onAppSelected(appInfo.packageName, !appInfo.isSelected.value) },
+            .clickable {
+                if (isSingleSelection) {
+                    onAppSelected(appInfo.packageName, true)
+                } else {
+                    onAppSelected(appInfo.packageName, !appInfo.isSelected.value)
+                }
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         val iconBitmap = remember(appInfo.icon) { appInfo.icon?.toBitmap()?.asImageBitmap() }
@@ -166,9 +197,11 @@ fun SelectableAppListItem(appInfo: SelectableAppInfo, onAppSelected: (String, Bo
         }
         Spacer(modifier = Modifier.width(16.dp))
         Text(appInfo.appName, style = MaterialTheme.typography.body1, modifier = Modifier.weight(1f))
-        Checkbox(
-            checked = appInfo.isSelected.value, // Access the MutableState's value
-            onCheckedChange = { isChecked -> onAppSelected(appInfo.packageName, isChecked) }
-        )
+        if (!isSingleSelection) {
+            Checkbox(
+                checked = appInfo.isSelected.value,
+                onCheckedChange = { isChecked -> onAppSelected(appInfo.packageName, isChecked) }
+            )
+        }
     }
 }

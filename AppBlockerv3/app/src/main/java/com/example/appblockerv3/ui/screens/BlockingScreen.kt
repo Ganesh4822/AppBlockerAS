@@ -20,7 +20,7 @@ import com.example.appblockerv3.R // Replace with your actual R file
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun BlockingScreen(onNavigateToAnalytics: () -> Unit, onNavigateToFocusTimer: () -> Unit,
-                   onCreateGroupClick: () -> Unit) {
+                   onCreateGroupClick: () -> Unit,onSelectAppClick: () -> Unit) {
     val selectedTabIndex = remember { mutableStateOf(0) }
     // 0 for Grouped Blocks, 1 for Individual Blocks
 
@@ -107,7 +107,7 @@ fun BlockingScreen(onNavigateToAnalytics: () -> Unit, onNavigateToFocusTimer: ()
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { /* TODO: Implement Create a Group action */ }) {
+                    Button(onClick = onSelectAppClick) {
                         Text(stringResource(R.string.select_app))
                     }
 

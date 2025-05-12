@@ -37,13 +37,14 @@ fun BlockingScreenNav(navController: NavHostController) {
     BlockingScreen(
         onNavigateToAnalytics = { navController.navigate("analytics") },
         onNavigateToFocusTimer = { navController.navigate("focus_timer") },
-        onCreateGroupClick = { navController.navigate("select_apps") } // New callback
+        onCreateGroupClick = { navController.navigate("select_apps") },
+        onSelectAppClick = { navController.navigate("select_single_app") }
     )
 }
 @Composable
 fun SelectAppsScreenNav(navController: NavHostController) {
     SelectAppsScreen(
-        onNavigateBack = { navController.popBackStack() }, // Go back to the previous screen
+        onNavigateBack = { navController.popBackStack() },
         onCreateGroup = { selectedAppPackageNames ->
             val gson = Gson()
             val selectedAppsJson = gson.toJson(selectedAppPackageNames)
@@ -52,7 +53,13 @@ fun SelectAppsScreenNav(navController: NavHostController) {
     )
 }
 
-
+@Composable
+fun SelectAppsScreenNavForSingleSelection(navController: NavHostController) {
+    SelectAppsScreen(
+        onNavigateBack = { navController.popBackStack() }, // Go back to the previous screen
+        isSingleSelection = true
+    )
+}
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateGroupScreenNav(navController: NavHostController, selectedAppsJson: String?) {
@@ -92,6 +99,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "blocking") {
+                        /*
+                        All the routes are defined here.
+                        Routes starts from the blocking screen This is the point where the flow starts.
+                         */
                         composable("blocking") {
                             BlockingScreenNav(navController = navController)
                         }
@@ -106,7 +117,21 @@ class MainActivity : ComponentActivity() {
                                 navController = navController
                             )
                         }
-                        //Handling the selected app list to be passed to the create group screen
+
+                        /*
+                            Handling Individual app blocks here
+                            when a user switches to individual blocking screen he should see the app
+                            list without the checkboxes and each app should be clickable.
+                            This is handled in SelectAppsScreen.
+                         */
+
+                        composable("select_single_app") {
+                            SelectAppsScreenNavForSingleSelection(
+                                navController = navController
+                            )
+                        }
+
+                        //Handling the selected app list to be passed to the create group screen.
                         composable(
                             "create_group/{selectedAppsJson}",
                             arguments = listOf(navArgument("selectedAppsJson") { nullable = true })
