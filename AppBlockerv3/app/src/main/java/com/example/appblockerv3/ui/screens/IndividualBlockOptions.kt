@@ -1,33 +1,48 @@
 package com.example.appblockerv3.ui.screens
 
-
-import android.graphics.drawable.Drawable
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
 import com.example.appblockerv3.R
 import com.example.appblockerv3.data.AppSchedule
 import com.example.appblockerv3.utils.bottomsheets.BlockOnScheduleBottomSheet
@@ -37,103 +52,24 @@ import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-data class AppData(val packageName: String, val appName: String, val icon: Drawable?)
-
-@Composable
-fun AppsSection(selectedAppsInfo :List<AppData> ) {
-
-    Column(
-        modifier = Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-            .background(Color(0xFFE8EAFF))
-    ) {
-        // Header (Light Purple Background)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFE8EAFD)) // Light Purple
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(stringResource(R.string.apps_count, selectedAppsInfo.size), modifier = Modifier.weight(1f))
-            IconButton(onClick = { /* TODO: Navigate back to app selection */ }) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_apps))
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .border(
-                    width = 1.dp,
-                    color = Color.LightGray, // Border color
-                )
-        ) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                items(selectedAppsInfo) { appData ->
-                    val iconBitmap = remember(appData.icon) { appData.icon?.toBitmap()?.asImageBitmap() }
-                    if (iconBitmap != null) {
-                        Image(
-                            bitmap = iconBitmap,
-                            contentDescription = appData.appName,
-                            modifier = Modifier.size(48.dp).padding(end = 8.dp)
-                        )
-                    } else {
-                        Icon(Icons.Filled.Block, contentDescription = appData.appName, modifier = Modifier.size(48.dp).padding(end = 8.dp))
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-/*
-This is a create group screen.
-This screen contains the name of the group, the apps to be blocked, which are selected from the
-app selection screen.
-This screen also contains the block on schedule section and daily usage limit button.
-*/
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CreateGroupScreen(
+fun IndividualBlockOptions(
     onNavigateBack: () -> Unit,
-    selectedAppPackageNames: List<String>,
-    onSaveGroup: (
-        groupName: String,
-        appList: List<String>,
-        schedules: List<AppSchedule>, // we will save the list of schdules
+    selectedAppPackageName: String,
+    onSaveSettings: (
+        packageName: String,
+        schedules: List<AppSchedule>, // we will save 2 schedules per app.
         usageLimitHours: Int,
         usageLimitMinutes: Int
-    ) -> Unit // Updated onSaveGroup
+    ) -> Unit // onSaveSettings
 ) {
+    Log.d("IndividualBlockOptions", "selectedAppPackageName: $selectedAppPackageName")
     val context = LocalContext.current
     val packageManager = context.packageManager
-    var groupName by remember { mutableStateOf("") }
-    val selectedAppsInfo by remember(selectedAppPackageNames) {
-        derivedStateOf {
-            selectedAppPackageNames.mapNotNull { packageName ->
-                try {
-                    val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-                    val appName = applicationInfo.loadLabel(packageManager).toString()
-                    val appIcon = applicationInfo.loadIcon(packageManager)
-                    AppData(packageName, appName, appIcon)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
-        }
-    }
-
+    val appName = packageManager.getApplicationLabel(packageManager.getApplicationInfo(selectedAppPackageName, 0)).toString()
+    Log.d("IndividualBlockOptions", "selectedAppName: $appName")
     val scheduleBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
@@ -201,7 +137,7 @@ fun CreateGroupScreen(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(stringResource(R.string.group)) },
+                        title = {Text(text = appName)},
                         navigationIcon = {
                             IconButton(onClick = onNavigateBack) {
                                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -212,18 +148,17 @@ fun CreateGroupScreen(
                 bottomBar = {
                     Button(
                         onClick = {
-                            onSaveGroup(groupName
-                                ,selectedAppPackageNames
+                            onSaveSettings(selectedAppPackageName
                                 ,savedSchedules
                                 ,usageLimitHours
                                 ,usageLimitMinutes
-                                )
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                             .background(Color(0xFFE8EAFF)),
-                        enabled = groupName.isNotBlank() // Disable if group name is empty
+                        //enabled = groupName.isNotBlank() // Disable if group name is empty
                     ) {
                         Text(stringResource(R.string.save))
                     }
@@ -235,36 +170,6 @@ fun CreateGroupScreen(
                         .padding(paddingValues)
                         .padding(16.dp)
                 ) {
-                    // Name of the group
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 3.dp, vertical = 8.dp)
-                            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))// To only round the top corners
-                            .background(Color(0xFFE8EAFF) //Light purple
-                            )
-                    ) {
-                        Text(
-                            text = "Name",
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            style = MaterialTheme.typography.body2,
-                            color = Color.Black
-                        )
-                        OutlinedTextField(
-                            value = groupName,
-                            onValueChange = { groupName = it },
-                            modifier = Modifier.fillMaxWidth()
-                                .background(Color.White)
-
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Apps Section
-                    AppsSection(selectedAppsInfo)
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     // Block on a Schedule
                     Column(
                         modifier = Modifier.fillMaxWidth()
@@ -369,22 +274,3 @@ fun CreateGroupScreen(
 
     }
 }
-
-/*
-Package_name :id
-group_id
-group_name :
-schedule_id : [SHA,SHA]
-usage_limit (minutes)
-*/
-
-/*
-  dm_schedules
-
-  schedule_id : SHA(days,start_time,end_time)
-  days : 1,2,3,4,5
-  start_time :
-  end_time :
-*/
-
-// schedule_id 0 ,days=2,3,4,5,6, startTime=10:00 AM, endTime=07:00 AM

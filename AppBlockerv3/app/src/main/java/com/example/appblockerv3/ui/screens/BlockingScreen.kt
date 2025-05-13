@@ -76,6 +76,7 @@ fun BlockingScreen(onNavigateToAnalytics: () -> Unit, onNavigateToFocusTimer: ()
 
             // Content when no groups are created (for Grouped Blocks tab)
             if (selectedTabIndex.value == 0) {
+                //Todo content to show the groups data here
                 Text(
                     text = stringResource(R.string.no_groups_yet),
                     style = MaterialTheme.typography.h6,
@@ -93,7 +94,7 @@ fun BlockingScreen(onNavigateToAnalytics: () -> Unit, onNavigateToFocusTimer: ()
                     Text(stringResource(R.string.create_a_group))
                 }
             } else {
-                // TODO: Content for Individual Blocks tab (likely a list of individually blocked apps)
+                    // TODO: Content for Individual Blocks tab.
 
                     Text(
                         text = stringResource(R.string.no_apps_found),

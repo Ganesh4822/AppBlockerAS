@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.appblockerv3.ui.screens.BlockingScreen
 import com.example.appblockerv3.ui.screens.CreateGroupScreen
+import com.example.appblockerv3.ui.screens.IndividualBlockOptions
 import com.example.appblockerv3.ui.screens.SelectAppsScreen
 import com.google.gson.Gson
 
@@ -54,12 +55,15 @@ fun SelectAppsScreenNav(navController: NavHostController) {
 }
 
 @Composable
-fun SelectAppsScreenNavForSingleSelection(navController: NavHostController) {
+fun SelectAppsScreenNavForSingleSelectionNav(navController: NavHostController) {
     SelectAppsScreen(
         onNavigateBack = { navController.popBackStack() }, // Go back to the previous screen
-        isSingleSelection = true
+        isSingleSelection = true,
+        onAppSelected = { packageName -> navController.navigate("individual_block/$packageName")}
     )
 }
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateGroupScreenNav(navController: NavHostController, selectedAppsJson: String?) {
@@ -86,7 +90,23 @@ fun CreateGroupScreenNav(navController: NavHostController, selectedAppsJson: Str
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun SaveSingleAppSettingNav(navController: NavHostController, selectedApp: String) {
+    val selectedAppPackageName = selectedApp
 
+    IndividualBlockOptions (
+        onNavigateBack = { navController.popBackStack() },
+        selectedAppPackageName = selectedAppPackageName,
+        onSaveSettings = {  appName, schedules, usageLimitHours, usageLimitMinutes ->
+            Log.d("MainActivity", "App Name: $appName")
+            Log.d("MainActivity", "Schedules: $schedules")
+            Log.d("MainActivity", "Usage Limit: $usageLimitHours hours and $usageLimitMinutes minutes")
+            // TODO: Implement logic to save this data in DB
+            navController.popBackStack()
+        }
+    )
+}
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,7 +146,7 @@ class MainActivity : ComponentActivity() {
                          */
 
                         composable("select_single_app") {
-                            SelectAppsScreenNavForSingleSelection(
+                            SelectAppsScreenNavForSingleSelectionNav(
                                 navController = navController
                             )
                         }
@@ -138,6 +158,17 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val selectedAppsJson = backStackEntry.arguments?.getString("selectedAppsJson")
                             CreateGroupScreenNav(navController = navController, selectedAppsJson = selectedAppsJson)
+                        }
+
+                        //Handling schedule and daily usage limit setting for single app selection.
+                        composable(
+                            "individual_block/{packageName}", // This Parameter should exactly
+                            arguments = listOf(navArgument("packageName") { nullable = true })
+                        ) { backStackEntry ->
+                            val selectedApp = backStackEntry.arguments?.getString("packageName")
+                            if (selectedApp != null) {
+                                SaveSingleAppSettingNav(navController = navController,selectedApp)
+                            }
                         }
                     }
                 }

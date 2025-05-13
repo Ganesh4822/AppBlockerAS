@@ -50,7 +50,7 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit
     var allApps by remember { mutableStateOf<List<SelectableAppInfo>>(emptyList()) }
     val searchQuery = remember { mutableStateOf("") }
     val selectedApps = remember { mutableStateListOf<String>() }
-
+    Log.d("Appcheck", "SelectAppsScreen")
     LaunchedEffect(key1 = true) {
         val installedApps = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES)
         val tempAppList = mutableListOf<SelectableAppInfo>()
