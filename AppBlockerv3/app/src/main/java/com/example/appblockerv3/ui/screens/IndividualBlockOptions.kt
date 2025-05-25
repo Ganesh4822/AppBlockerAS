@@ -45,12 +45,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.appblockerv3.R
 import com.example.appblockerv3.data.AppSchedule
+import com.example.appblockerv3.data.db.entities.ScheduleEntity
 import com.example.appblockerv3.utils.bottomsheets.BlockOnScheduleBottomSheet
 import com.example.appblockerv3.utils.bottomsheets.DailyUsageLimitBottomSheet
 import com.example.appblockerv3.utils.composeItems.ScheduleItem
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)

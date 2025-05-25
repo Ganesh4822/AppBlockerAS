@@ -94,7 +94,6 @@ fun BlockingScreen(onNavigateToAnalytics: () -> Unit, onNavigateToFocusTimer: ()
                     Text(stringResource(R.string.create_a_group))
                 }
             } else {
-                    // TODO: Content for Individual Blocks tab.
 
                     Text(
                         text = stringResource(R.string.no_apps_found),

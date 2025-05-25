@@ -1,0 +1,6 @@
+1. how to handle the edit feature on app section in create group
+    -we should be able to remove or add in to the app list.
+2.How to handle individually blocked apps that are already added in to the schedules.
+    -Give warning to user that particular app is already in a group/ is individually blocked.
+3.When User wants to add another schedule to the group. The bottom sheet UI should refresh currently
+it is keeping the state of the previous schedule.

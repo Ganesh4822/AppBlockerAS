@@ -3,6 +3,7 @@ package com.example.appblockerv3.utils.bottomsheets
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +52,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.appblockerv3.R
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 /*
 This is the bottom sheet that represents the block on schedule section.
@@ -77,11 +79,11 @@ fun BlockOnScheduleBottomSheet(
     var showStartTimePicker by remember { mutableStateOf(false) }
     var showEndTimePicker by remember { mutableStateOf(false) }
 
-    val dayLabels = listOf("S", "M", "T", "W", "T", "F", "S")
+    val dayLabels = listOf("M", "T", "W", "T", "F", "S","S")
 
     LaunchedEffect(localIsAllDay) {
         if (localIsAllDay) {
-            localSelectedDays = (1..7).toList() // Select all days
+            localSelectedDays = (0..6).toList() // Select all days
         } else if (localSelectedDays.size == 7) {
             localSelectedDays = emptyList()
         }
@@ -141,14 +143,16 @@ fun BlockOnScheduleBottomSheet(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     dayLabels.forEachIndexed { index, label ->
-                        val dayIndex = index + 1
+                        val dayIndex = index
                         val isSelected = localSelectedDays.contains(dayIndex)
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clickable {
+                                    Log.d("days", "selected days are : $localSelectedDays " +
+                                            "and index $dayIndex, lable : ${dayLabels.get(dayIndex)}")
                                     localSelectedDays = if (localIsAllDay) {
-                                        (1..7).toList()
+                                        (0..6).toList()
                                     }
                                     else{
                                         if (isSelected) {
@@ -157,6 +161,9 @@ fun BlockOnScheduleBottomSheet(
                                             localSelectedDays + dayIndex
                                         }.sorted()
                                     }
+
+                                    Log.d("days", "selected days are2 : $localSelectedDays " +
+                                            "and index $dayIndex, lable : ${dayLabels.get(dayIndex)}")
                                 }
                                 .background(
                                     if (isSelected) Color(0xFF3B82F6) else Color.LightGray,
@@ -244,12 +251,14 @@ fun BlockOnScheduleBottomSheet(
 
             Button(
                 onClick = {
+
                     onScheduleSaved(
                         localSelectedDays,
                         localStartTime,
                         localEndTime,
                         localIsAllDay
                     )
+                    Log.d("Days", "selected days are : $localSelectedDays")
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(

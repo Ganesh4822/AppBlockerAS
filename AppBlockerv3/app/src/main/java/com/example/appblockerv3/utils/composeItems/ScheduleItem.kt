@@ -29,17 +29,17 @@ fun ScheduleItem(schedule: AppSchedule, onDelete: () -> Unit) {
     ) {
         val daysText = schedule.days.split(",").joinToString(" ") { day ->
             when (day.toInt()) {
-                1 -> "M"
-                2 -> "T"
-                3 -> "W"
-                4 -> "T"
-                5 -> "F"
+                0 -> "M"
+                1 -> "T"
+                2 -> "W"
+                3 -> "T"
+                4 -> "F"
+                5 -> "S"
                 6 -> "S"
-                7 -> "S"
                 else -> ""
             }
         }
-        val timeText = if (schedule.isAllDay) "All Day" else "${schedule.startTime} - ${schedule.endTime}"
+        val timeText = "${schedule.startTime} - ${schedule.endTime}"
 
         Column {
             Text(text = daysText, style = MaterialTheme.typography.body1)

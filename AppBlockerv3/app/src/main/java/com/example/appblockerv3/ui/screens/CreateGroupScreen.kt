@@ -30,12 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appblockerv3.R
 import com.example.appblockerv3.data.AppSchedule
+import com.example.appblockerv3.data.db.entities.ScheduleEntity
 import com.example.appblockerv3.utils.bottomsheets.BlockOnScheduleBottomSheet
 import com.example.appblockerv3.utils.bottomsheets.DailyUsageLimitBottomSheet
 import com.example.appblockerv3.utils.composeItems.ScheduleItem
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 data class AppData(val packageName: String, val appName: String, val icon: Drawable?)
 
@@ -110,7 +112,7 @@ fun CreateGroupScreen(
     onSaveGroup: (
         groupName: String,
         appList: List<String>,
-        schedules: List<AppSchedule>, // we will save the list of schdules
+        schedules: List<ScheduleEntity>, // we will save the list of schdules
         usageLimitHours: Int,
         usageLimitMinutes: Int
     ) -> Unit // Updated onSaveGroup
@@ -143,11 +145,19 @@ fun CreateGroupScreen(
     var endTime by remember { mutableStateOf<LocalTime?>(LocalTime.of(17, 0)) }
     var isAllDay by remember { mutableStateOf(false) }
 
+
+    //schedule entity Iterm
+    var startTimeHrs by remember { mutableStateOf(9) }
+    var endTimeHrs by remember { mutableStateOf(9) }
+    var startTimemins by remember { mutableStateOf(30) }
+    var endTimemins by remember { mutableStateOf(30) }
+    var selectedDaysBitmask by remember { mutableStateOf(0) }
+    var savedSchedules2 by remember { mutableStateOf(emptyList<ScheduleEntity>()) }
+
     //To save the list of schedules
     val savedSchedules = remember { mutableStateListOf<AppSchedule>() }
 
     // State for Daily Usage Limit
-    var showUsageLimitBottomSheet by remember { mutableStateOf(false) }
     val usageLimitBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     var usageLimitHours by rememberSaveable { mutableStateOf(0) }
     var usageLimitMinutes by rememberSaveable { mutableStateOf(0) }
@@ -162,6 +172,7 @@ fun CreateGroupScreen(
                     startTime = start
                     endTime = end
                     isAllDay = allDay
+
                     val schedule = AppSchedule(
                         days = days.joinToString(","),
                         startTime = start?.format(DateTimeFormatter.ofPattern("hh:mm a")),
@@ -214,7 +225,7 @@ fun CreateGroupScreen(
                         onClick = {
                             onSaveGroup(groupName
                                 ,selectedAppPackageNames
-                                ,savedSchedules
+                                ,savedSchedules2
                                 ,usageLimitHours
                                 ,usageLimitMinutes
                                 )
@@ -256,7 +267,6 @@ fun CreateGroupScreen(
                             onValueChange = { groupName = it },
                             modifier = Modifier.fillMaxWidth()
                                 .background(Color.White)
-
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -277,11 +287,13 @@ fun CreateGroupScreen(
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(Color(0xFFE8EAFF))
                                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                                .clickable { scope.launch { scheduleBottomSheetState.show() } }
+
                         ) {
                             Text(stringResource(R.string.block_on_schedule), modifier = Modifier.weight(1f))
                             if(savedSchedules.size < 2){
-                                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_schedule))
+                                IconButton(onClick = { scope.launch { scheduleBottomSheetState.show() } }) {
+                                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_schedule))
+                                }
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))

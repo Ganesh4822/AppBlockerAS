@@ -1,24 +1,29 @@
 package com.example.appblockerv3.utils.bottomsheets
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -28,23 +33,28 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appblockerv3.R
+import kotlin.math.abs
 
 
 /*
-    This is Bottom sheet which is used to pick hours and minuts limit on overall app usage
+   This is Bottom sheet which is used to pick hours and minuts limit on overall app usage.
  */
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
@@ -73,8 +83,6 @@ fun DailyUsageLimitBottomSheet(
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
             }
         }
-
-
 
         Spacer(modifier = Modifier.height(16.dp))
         // Buttons
@@ -124,7 +132,8 @@ fun TimeLimitPicker(
     selectedHour: Int,
     selectedMinute: Int,
     onHourSelected: (Int) -> Unit,
-    onMinuteSelected: (Int) -> Unit
+    onMinuteSelected: (Int) -> Unit,
+
 ) {
     val hours = (0..23).toList()
     val minutes = (0..59).toList()
@@ -142,7 +151,8 @@ fun TimeLimitPicker(
             values = hours,
             selectedValue = selectedHour,
             onValueSelected = onHourSelected,
-            label = "Hrs"
+            label = "Hrs",
+            visibleItems = 7
         )
 
 
@@ -157,7 +167,8 @@ fun TimeLimitPicker(
             values = minutes,
             selectedValue = selectedMinute,
             onValueSelected = onMinuteSelected,
-            label = "Mins"
+            label = "Mins",
+            visibleItems = 7
         )
     }
 }
@@ -168,16 +179,22 @@ fun NumberPicker(
     values: List<Int>,
     selectedValue: Int,
     onValueSelected: (Int) -> Unit,
-    label: String
-) {
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = values.indexOf(selectedValue).coerceAtLeast(0)
-    )
+    label: String,
+    visibleItems: Int,
 
-    LaunchedEffect(listState.isScrollInProgress.not()) {
-        val index = listState.firstVisibleItemIndex + 1
-        if (index in values.indices) {
-            onValueSelected(values[index])
+) {
+    val listState = rememberLazyListState()
+    val halfVisibleItems = visibleItems / 2
+    val paddingItems = halfVisibleItems - 1
+
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (!listState.isScrollInProgress) {
+            // Calculate the item that's currently in the center
+            val centerItemIndex = listState.firstVisibleItemIndex + halfVisibleItems
+            if (centerItemIndex >= paddingItems && centerItemIndex < values.size + paddingItems) {
+                val value = values[(centerItemIndex - paddingItems) % values.size]
+                onValueSelected(value)
+            }
         }
     }
 
@@ -186,7 +203,7 @@ fun NumberPicker(
 
         LazyColumn(
             state = listState,
-            modifier = Modifier.height(120.dp),
+            modifier = Modifier.height(90.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
