@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appblockerv3.R
 import com.example.appblockerv3.data.AppSchedule
+import com.example.appblockerv3.data.db.AppBlockerDatabase
+import com.example.appblockerv3.data.db.coverters.DaysOfWeek
 import com.example.appblockerv3.data.db.entities.ScheduleEntity
 import com.example.appblockerv3.utils.bottomsheets.BlockOnScheduleBottomSheet
 import com.example.appblockerv3.utils.bottomsheets.DailyUsageLimitBottomSheet
@@ -37,7 +39,6 @@ import com.example.appblockerv3.utils.composeItems.ScheduleItem
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 data class AppData(val packageName: String, val appName: String, val icon: Drawable?)
 
@@ -120,6 +121,11 @@ fun CreateGroupScreen(
     val context = LocalContext.current
     val packageManager = context.packageManager
     var groupName by remember { mutableStateOf("") }
+
+    val daoGroup = AppBlockerDatabase.getDatabase(context).appGroupDao();
+    val daoSchedule = AppBlockerDatabase.getDatabase(context).appScheduleDao();
+    val daoGroupAppjoin = AppBlockerDatabase.getDatabase(context).groupAppsJoinDao();
+
     val selectedAppsInfo by remember(selectedAppPackageNames) {
         derivedStateOf {
             selectedAppPackageNames.mapNotNull { packageName ->
@@ -140,11 +146,10 @@ fun CreateGroupScreen(
     val scope = rememberCoroutineScope()
 
     // State to hold the schedule data.  Using rememberSaveable for surviving config changes.
-    var selectedDays by remember { mutableStateOf(emptyList<Int>()) }
+    var selectedDays : Set<DaysOfWeek> by remember { mutableStateOf(emptySet()) }
     var startTime by remember { mutableStateOf<LocalTime?>(LocalTime.of(9, 0)) }
     var endTime by remember { mutableStateOf<LocalTime?>(LocalTime.of(17, 0)) }
     var isAllDay by remember { mutableStateOf(false) }
-
 
     //schedule entity Iterm
     var startTimeHrs by remember { mutableStateOf(9) }
@@ -152,7 +157,7 @@ fun CreateGroupScreen(
     var startTimemins by remember { mutableStateOf(30) }
     var endTimemins by remember { mutableStateOf(30) }
     var selectedDaysBitmask by remember { mutableStateOf(0) }
-    var savedSchedules2 by remember { mutableStateOf(emptyList<ScheduleEntity>()) }
+    val savedSchedules2 =  remember { mutableStateListOf<ScheduleEntity>()}
 
     //To save the list of schedules
     val savedSchedules = remember { mutableStateListOf<AppSchedule>() }
@@ -173,21 +178,22 @@ fun CreateGroupScreen(
                     endTime = end
                     isAllDay = allDay
 
-                    val schedule = AppSchedule(
-                        days = days.joinToString(","),
-                        startTime = start?.format(DateTimeFormatter.ofPattern("hh:mm a")),
-                        endTime = end?.format(DateTimeFormatter.ofPattern("hh:mm a")),
-                        isAllDay = allDay
+                    val schedule2 = ScheduleEntity(
+                        scheduleDaysBitMask = DaysOfWeek.toBitmask(days),
+                        startHour = start!!.hour,
+                        startMin = start.minute,
+                        endHour = end!!.hour,
+                        endMin = end.minute
                     )
-                    if (savedSchedules.size < 2) { // Limit to two schedules
-                        savedSchedules.add(schedule)
+                    if (savedSchedules2.size < 2) { // Limit to two schedules
+                        savedSchedules2.add(schedule2)
                     } else {
                         // Optionally show a message to the user that they can only add two schedules
                         println("Maximum of two schedules allowed per group.")
                     }
                     scope.launch { scheduleBottomSheetState.hide() }
                 },
-                selectedDays = selectedDays,
+                initialSelectedDays = selectedDays,
                 startTime = startTime,
                 endTime = endTime,
                 isAllDay = isAllDay
@@ -290,7 +296,7 @@ fun CreateGroupScreen(
 
                         ) {
                             Text(stringResource(R.string.block_on_schedule), modifier = Modifier.weight(1f))
-                            if(savedSchedules.size < 2){
+                            if(savedSchedules2.size < 2){
                                 IconButton(onClick = { scope.launch { scheduleBottomSheetState.show() } }) {
                                     Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_schedule))
                                 }
@@ -299,7 +305,7 @@ fun CreateGroupScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         //show selected days and time range Here
-                        if (savedSchedules.isNotEmpty()) {
+                        if (savedSchedules2.isNotEmpty()) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -315,10 +321,10 @@ fun CreateGroupScreen(
                                     style = MaterialTheme.typography.subtitle1,
                                     modifier = Modifier.padding(bottom = 4.dp)
                                 )
-                                savedSchedules.forEachIndexed { index, schedule ->
+                                savedSchedules2.forEachIndexed { index, schedule ->
                                     ScheduleItem(
                                         schedule = schedule,
-                                        onDelete = { savedSchedules.removeAt(index) }
+                                        onDelete = { savedSchedules2.removeAt(index) }
                                     )
                                 }
                             }

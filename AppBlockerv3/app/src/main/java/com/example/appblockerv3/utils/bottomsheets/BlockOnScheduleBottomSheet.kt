@@ -4,6 +4,7 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.appblockerv3.R
+import com.example.appblockerv3.data.db.coverters.DaysOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -66,26 +69,35 @@ When the schedule is set, Apps will be blocked on the selected schedule.
 @Composable
 fun BlockOnScheduleBottomSheet(
     onDismissRequest: () -> Unit,
-    onScheduleSaved: (List<Int>, LocalTime?, LocalTime?, Boolean) -> Unit,
-    selectedDays: List<Int>,
+    onScheduleSaved: (Set<DaysOfWeek>, LocalTime?, LocalTime?, Boolean) -> Unit,
+    initialSelectedDays: Set<DaysOfWeek>,
     startTime: LocalTime?,
     endTime: LocalTime?,
     isAllDay: Boolean
 ) {
-    var localSelectedDays by remember { mutableStateOf(selectedDays) } // 1 for Mon, 7 for Sun
-    var localStartTime by remember { mutableStateOf(startTime) }
-    var localEndTime by remember { mutableStateOf(endTime) }
+    val context = LocalContext.current
+
+    var selectedDays by remember { mutableStateOf(initialSelectedDays) }
+
+    var localDaysSet : Set<DaysOfWeek> by remember { mutableStateOf(emptySet()) }
+    var localStartTime by remember { mutableStateOf(startTime ?: LocalTime.of(9, 0)) }
+    var localEndTime by remember { mutableStateOf(endTime ?: LocalTime.of(17, 0)) }
     var localIsAllDay by remember { mutableStateOf(isAllDay) }
     var showStartTimePicker by remember { mutableStateOf(false) }
     var showEndTimePicker by remember { mutableStateOf(false) }
 
-    val dayLabels = listOf("M", "T", "W", "T", "F", "S","S")
+    val dayLabels = listOf("M", "TU", "W", "TH", "F", "SA","SU")
+    val daysLabelsMap = mapOf("M" to DaysOfWeek.MONDAY,
+                                "TU" to DaysOfWeek.TUESDAY,
+                                "W" to DaysOfWeek.WEDNESDAY,
+                                "TH" to DaysOfWeek.THURSDAY,
+                                "F" to DaysOfWeek.FRIDAY,
+                                "SA" to DaysOfWeek.SATURDAY,
+                                "SU" to DaysOfWeek.SUNDAY,)
 
     LaunchedEffect(localIsAllDay) {
         if (localIsAllDay) {
-            localSelectedDays = (0..6).toList() // Select all days
-        } else if (localSelectedDays.size == 7) {
-            localSelectedDays = emptyList()
+            selectedDays = DaysOfWeek.entries.toSet()
         }
     }
 
@@ -143,27 +155,21 @@ fun BlockOnScheduleBottomSheet(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     dayLabels.forEachIndexed { index, label ->
-                        val dayIndex = index
-                        val isSelected = localSelectedDays.contains(dayIndex)
+                        val dayOfWeek = daysLabelsMap[label]
+                        val isSelected = selectedDays.contains(dayOfWeek)
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
-                                .clickable {
-                                    Log.d("days", "selected days are : $localSelectedDays " +
-                                            "and index $dayIndex, lable : ${dayLabels.get(dayIndex)}")
-                                    localSelectedDays = if (localIsAllDay) {
-                                        (0..6).toList()
-                                    }
-                                    else{
-                                        if (isSelected) {
-                                            localSelectedDays.filter { it != dayIndex }
-                                        } else {
-                                            localSelectedDays + dayIndex
-                                        }.sorted()
-                                    }
+                                .clickable(enabled = !isAllDay) {
 
-                                    Log.d("days", "selected days are2 : $localSelectedDays " +
-                                            "and index $dayIndex, lable : ${dayLabels.get(dayIndex)}")
+                                    if (dayOfWeek != null) { // Null check for safety
+                                        selectedDays = if (isSelected) {
+                                            selectedDays - dayOfWeek
+                                        } else {
+                                            selectedDays + dayOfWeek
+                                        }
+                                    }
+                                    Log.d("days", "selected days are2 : $localDaysSet ")
                                 }
                                 .background(
                                     if (isSelected) Color(0xFF3B82F6) else Color.LightGray,
@@ -250,15 +256,25 @@ fun BlockOnScheduleBottomSheet(
             Spacer(modifier = Modifier.width(16.dp)) // Space between buttons
 
             Button(
-                onClick = {
 
+                onClick = {
+                    if (selectedDays.isEmpty()) {
+                        Toast.makeText(context, "Please select at least one day.", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (startTime != null) {
+                        if (startTime.isAfter(endTime) || startTime == endTime) {
+                            Toast.makeText(context, "End time must be after start time.", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                    }
                     onScheduleSaved(
-                        localSelectedDays,
+                        selectedDays,
                         localStartTime,
                         localEndTime,
                         localIsAllDay
                     )
-                    Log.d("Days", "selected days are : $localSelectedDays")
+                    Log.d("Days", "selected days are : $selectedDays")
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(

@@ -16,10 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.appblockerv3.data.AppSchedule
+import com.example.appblockerv3.data.db.coverters.DaysOfWeek
+import com.example.appblockerv3.data.db.entities.ScheduleEntity
 
 @Composable
-fun ScheduleItem(schedule: AppSchedule, onDelete: () -> Unit) {
+fun ScheduleItem(schedule: ScheduleEntity, onDelete: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -27,22 +28,25 @@ fun ScheduleItem(schedule: AppSchedule, onDelete: () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        val daysText = schedule.days.split(",").joinToString(" ") { day ->
-            when (day.toInt()) {
-                0 -> "M"
-                1 -> "T"
-                2 -> "W"
-                3 -> "T"
-                4 -> "F"
-                5 -> "S"
-                6 -> "S"
-                else -> ""
+
+        val daysSet = DaysOfWeek.fromBitmask(schedule.scheduleDaysBitMask)
+        val daysText2 = daysSet.joinToString(", "){  day->
+            when(day){
+                DaysOfWeek.MONDAY -> "M"
+                DaysOfWeek.TUESDAY -> "TU"
+                DaysOfWeek.WEDNESDAY -> "W"
+                DaysOfWeek.THURSDAY -> "TH"
+                DaysOfWeek.FRIDAY -> "F"
+                DaysOfWeek.SATURDAY -> "SA"
+                DaysOfWeek.SUNDAY -> "SU"
             }
         }
-        val timeText = "${schedule.startTime} - ${schedule.endTime}"
+        val startTimeString = String.format("%02d:%02d", schedule.startHour, schedule.startMin)
+        val endTimeString = String.format("%02d:%02d", schedule.endHour, schedule.endMin)
+        val timeText = "$startTimeString - $endTimeString"
 
         Column {
-            Text(text = daysText, style = MaterialTheme.typography.body1)
+            Text(text = daysText2, style = MaterialTheme.typography.body1)
             Text(text = timeText, style = MaterialTheme.typography.body2)
         }
 

@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.appblockerv3.R
 import com.example.appblockerv3.data.AppSchedule
+import com.example.appblockerv3.data.db.coverters.DaysOfWeek
 import com.example.appblockerv3.data.db.entities.ScheduleEntity
 import com.example.appblockerv3.utils.bottomsheets.BlockOnScheduleBottomSheet
 import com.example.appblockerv3.utils.bottomsheets.DailyUsageLimitBottomSheet
@@ -52,7 +53,6 @@ import com.example.appblockerv3.utils.composeItems.ScheduleItem
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
@@ -62,7 +62,7 @@ fun IndividualBlockOptions(
     selectedAppPackageName: String,
     onSaveSettings: (
         packageName: String,
-        schedules: List<AppSchedule>, // we will save 2 schedules per app.
+        schedules: List<ScheduleEntity>, // we will save 2 schedules per app.
         usageLimitHours: Int,
         usageLimitMinutes: Int
     ) -> Unit // onSaveSettings
@@ -76,13 +76,13 @@ fun IndividualBlockOptions(
     val scope = rememberCoroutineScope()
 
     // State to hold the schedule data.  Using rememberSaveable for surviving config changes.
-    var selectedDays by remember { mutableStateOf(emptyList<Int>()) }
+    var selectedDays : Set<DaysOfWeek> by remember { mutableStateOf(emptySet()) }
     var startTime by remember { mutableStateOf<LocalTime?>(LocalTime.of(9, 0)) }
     var endTime by remember { mutableStateOf<LocalTime?>(LocalTime.of(17, 0)) }
     var isAllDay by remember { mutableStateOf(false) }
 
     //To save the list of schedules
-    val savedSchedules = remember { mutableStateListOf<AppSchedule>() }
+    val savedSchedules = remember { mutableStateListOf<ScheduleEntity>() }
 
     // State for Daily Usage Limit
     var showUsageLimitBottomSheet by remember { mutableStateOf(false) }
@@ -100,21 +100,23 @@ fun IndividualBlockOptions(
                     startTime = start
                     endTime = end
                     isAllDay = allDay
-                    val schedule = AppSchedule(
-                        days = days.joinToString(","),
-                        startTime = start?.format(DateTimeFormatter.ofPattern("hh:mm a")),
-                        endTime = end?.format(DateTimeFormatter.ofPattern("hh:mm a")),
-                        isAllDay = allDay
+
+                    val schedule2 = ScheduleEntity(
+                        scheduleDaysBitMask = DaysOfWeek.toBitmask(days),
+                        startHour = start!!.hour,
+                        startMin = start.minute,
+                        endHour = end!!.hour,
+                        endMin = end.minute
                     )
                     if (savedSchedules.size < 2) { // Limit to two schedules
-                        savedSchedules.add(schedule)
+                        savedSchedules.add(schedule2)
                     } else {
                         // Optionally show a message to the user that they can only add two schedules
                         println("Maximum of two schedules allowed per group.")
                     }
                     scope.launch { scheduleBottomSheetState.hide() }
                 },
-                selectedDays = selectedDays,
+                initialSelectedDays  = selectedDays,
                 startTime = startTime,
                 endTime = endTime,
                 isAllDay = isAllDay

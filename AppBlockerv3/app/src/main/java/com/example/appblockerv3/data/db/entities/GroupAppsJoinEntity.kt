@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
     primaryKeys = ["groupId", "packageName"],
     foreignKeys = [
         ForeignKey(
-            entity = GroupAppsJoinEntity::class,
+            entity = GroupBlockEntity::class,
             parentColumns = ["groupId"],
             childColumns = ["groupId"],
             onDelete = ForeignKey.CASCADE // If a group is deleted, its entries in this join table are also deleted
@@ -17,7 +17,6 @@ import androidx.room.PrimaryKey
     ]
 )
 data class GroupAppsJoinEntity(
-    @PrimaryKey
     val groupId: Long,
     val packageName: String
 )
