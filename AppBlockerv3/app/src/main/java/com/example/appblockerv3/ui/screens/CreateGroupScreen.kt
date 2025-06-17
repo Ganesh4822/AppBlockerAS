@@ -29,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appblockerv3.R
-import com.example.appblockerv3.data.AppSchedule
 import com.example.appblockerv3.data.db.AppBlockerDatabase
 import com.example.appblockerv3.data.db.coverters.DaysOfWeek
 import com.example.appblockerv3.data.db.entities.ScheduleEntity
@@ -38,6 +37,14 @@ import com.example.appblockerv3.utils.bottomsheets.DailyUsageLimitBottomSheet
 import com.example.appblockerv3.utils.composeItems.ScheduleItem
 import kotlinx.coroutines.launch
 import java.time.LocalTime
+
+//imports for database handlig
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appblockerv3.AppBlockerApplication
+import com.example.appblockerv3.data.db.dao.IndividualAppBlockDao
+import com.example.appblockerv3.data.repository.BlockingRepository
+import com.example.appblockerv3.ui.viewmodels.AppViewModelFactory
+import com.example.appblockerv3.ui.viewmodels.CreateGroupViewModel
 import java.time.format.DateTimeFormatter
 
 data class AppData(val packageName: String, val appName: String, val icon: Drawable?)
@@ -121,10 +128,18 @@ fun CreateGroupScreen(
     val context = LocalContext.current
     val packageManager = context.packageManager
     var groupName by remember { mutableStateOf("") }
+    val application = context.applicationContext as AppBlockerApplication
 
-    val daoGroup = AppBlockerDatabase.getDatabase(context).appGroupDao();
-    val daoSchedule = AppBlockerDatabase.getDatabase(context).appScheduleDao();
-    val daoGroupAppjoin = AppBlockerDatabase.getDatabase(context).groupAppsJoinDao();
+    val repository = application.database.let { db ->
+        BlockingRepository(
+            appGroupDao = db.appGroupDao(),
+            appScheduleDao = db.appScheduleDao(),
+            groupAppsJoinDao = db.groupAppsJoinDao(),
+            individualAppBlockDao = db.individualBlockDao()
+        )
+    }
+    val createGroupViewModel: CreateGroupViewModel = viewModel(factory = AppViewModelFactory(repository))
+
 
     val selectedAppsInfo by remember(selectedAppPackageNames) {
         derivedStateOf {
@@ -152,15 +167,7 @@ fun CreateGroupScreen(
     var isAllDay by remember { mutableStateOf(false) }
 
     //schedule entity Iterm
-    var startTimeHrs by remember { mutableStateOf(9) }
-    var endTimeHrs by remember { mutableStateOf(9) }
-    var startTimemins by remember { mutableStateOf(30) }
-    var endTimemins by remember { mutableStateOf(30) }
-    var selectedDaysBitmask by remember { mutableStateOf(0) }
     val savedSchedules2 =  remember { mutableStateListOf<ScheduleEntity>()}
-
-    //To save the list of schedules
-    val savedSchedules = remember { mutableStateListOf<AppSchedule>() }
 
     // State for Daily Usage Limit
     val usageLimitBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -229,7 +236,7 @@ fun CreateGroupScreen(
                 bottomBar = {
                     Button(
                         onClick = {
-                            onSaveGroup(groupName
+                            createGroupViewModel.saveGroup(groupName
                                 ,selectedAppPackageNames
                                 ,savedSchedules2
                                 ,usageLimitHours

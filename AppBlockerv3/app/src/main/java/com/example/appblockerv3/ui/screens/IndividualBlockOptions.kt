@@ -44,7 +44,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.appblockerv3.R
-import com.example.appblockerv3.data.AppSchedule
 import com.example.appblockerv3.data.db.coverters.DaysOfWeek
 import com.example.appblockerv3.data.db.entities.ScheduleEntity
 import com.example.appblockerv3.utils.bottomsheets.BlockOnScheduleBottomSheet
