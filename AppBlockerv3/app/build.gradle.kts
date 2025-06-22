@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.gson)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)

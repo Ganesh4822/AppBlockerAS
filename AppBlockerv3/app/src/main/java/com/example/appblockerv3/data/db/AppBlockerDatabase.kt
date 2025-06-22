@@ -21,7 +21,7 @@ import com.example.appblockerv3.data.db.entities.ScheduleEntity
         IndividualBlockEntity::class,
         GroupAppsJoinEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false // Set to true to export schema into a folder for version control
 )
 

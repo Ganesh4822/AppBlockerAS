@@ -1,5 +1,7 @@
 package com.example.appblockerv3.data.repository
 
+import android.util.Log
+
 import com.example.appblockerv3.data.db.dao.AppGroupDao
 import com.example.appblockerv3.data.db.dao.AppScheduleDao
 import com.example.appblockerv3.data.db.dao.GroupAppsJoinDao
@@ -60,7 +62,7 @@ class BlockingRepository(
         }
 
         //Create the GroupBlockEntity with schedule IDs above scheduleIDs
-        val newGroupBlock = GroupBlockEntity(
+        val newGroupBlock = GroupBlockEntity.createWithGeneratedId(
             groupName = groupName,
             usageLimitHours = usageLimitHours,
             usageLimitMinutes = usageLimitMinutes,
@@ -80,6 +82,11 @@ class BlockingRepository(
                 GroupAppsJoinEntity(groupId = groupId, packageName = packageName)
             )
         }
+
+        val allgroups = appGroupDao.getAllAppGroups()
+        Log.d("BlockingRepository", "All Groups: $allgroups")
+        val allSchedules = appScheduleDao.getAllAppSchedules()
+        Log.d("BlockingRepository", "All allSchedules: $allSchedules")
         groupId
     }
 }

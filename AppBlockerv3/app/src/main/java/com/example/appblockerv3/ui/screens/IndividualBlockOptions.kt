@@ -100,7 +100,7 @@ fun IndividualBlockOptions(
                     endTime = end
                     isAllDay = allDay
 
-                    val schedule2 = ScheduleEntity(
+                    val schedule2 = ScheduleEntity.createWithGeneratedId(
                         scheduleDaysBitMask = DaysOfWeek.toBitmask(days),
                         startHour = start!!.hour,
                         startMin = start.minute,

@@ -3,6 +3,8 @@ package com.example.appblockerv3.ui.screens
 
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.appblockerv3.R
 import com.example.appblockerv3.data.db.AppBlockerDatabase
 import com.example.appblockerv3.data.db.coverters.DaysOfWeek
@@ -41,7 +44,10 @@ import java.time.LocalTime
 //imports for database handlig
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appblockerv3.AppBlockerApplication
+import com.example.appblockerv3.data.db.dao.AppGroupDao
+import com.example.appblockerv3.data.db.dao.AppScheduleDao
 import com.example.appblockerv3.data.db.dao.IndividualAppBlockDao
+import com.example.appblockerv3.data.db.entities.GroupBlockEntity
 import com.example.appblockerv3.data.repository.BlockingRepository
 import com.example.appblockerv3.ui.viewmodels.AppViewModelFactory
 import com.example.appblockerv3.ui.viewmodels.CreateGroupViewModel
@@ -102,6 +108,42 @@ fun AppsSection(selectedAppsInfo :List<AppData> ) {
         }
     }
 }
+
+
+
+@Composable
+fun MyGroupDisplayScreen(appGroupDao: AppGroupDao, appScheduleDao: AppScheduleDao) {
+    // Collect the Flow as a State
+    val allGroups: List<GroupBlockEntity> by appGroupDao.getAllAppGroups().collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val allscedules: List<ScheduleEntity> by appScheduleDao.getAllAppSchedules().collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    LaunchedEffect(allGroups) {
+        if (allGroups.isNotEmpty()) {
+            Log.d("AllGroups", "Fetched all groups: $allGroups")
+            // Or you can iterate and print each group
+            allGroups.forEachIndexed { index, group ->
+                Log.d("AllGroups", "Group ${index + 1}: $group")
+            }
+        } else {
+            Log.d("AllGroups", "No groups found yet or list is empty.")
+        }
+
+        if (allscedules.isNotEmpty()) {
+            Log.d("AllGroups", "Fetched all scedules: $allscedules")
+            // Or you can iterate and print each group
+            allscedules.forEachIndexed { index, schedule ->
+                Log.d("AllGroups", "Schedule ${index + 1}: $schedule")
+            }
+        } else {
+            Log.d("AllGroups", "No groups found yet or list is empty.")
+        }
+    }
+}
+
+
 
 
 /*
@@ -185,7 +227,7 @@ fun CreateGroupScreen(
                     endTime = end
                     isAllDay = allDay
 
-                    val schedule2 = ScheduleEntity(
+                    val schedule2 = ScheduleEntity.createWithGeneratedId(
                         scheduleDaysBitMask = DaysOfWeek.toBitmask(days),
                         startHour = start!!.hour,
                         startMin = start.minute,
@@ -242,7 +284,10 @@ fun CreateGroupScreen(
                                 ,usageLimitHours
                                 ,usageLimitMinutes
                                 )
+                            onNavigateBack()
+                            Toast.makeText(context, "Group has been saved", Toast.LENGTH_SHORT).show()
                         },
+
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -250,6 +295,7 @@ fun CreateGroupScreen(
                         enabled = groupName.isNotBlank() // Disable if group name is empty
                     ) {
                         Text(stringResource(R.string.save))
+
                     }
                 }
             ) { paddingValues ->
@@ -286,6 +332,7 @@ fun CreateGroupScreen(
 
                     // Apps Section
                     AppsSection(selectedAppsInfo)
+                    MyGroupDisplayScreen(application.database.appGroupDao(),application.database.appScheduleDao())
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Block on a Schedule
