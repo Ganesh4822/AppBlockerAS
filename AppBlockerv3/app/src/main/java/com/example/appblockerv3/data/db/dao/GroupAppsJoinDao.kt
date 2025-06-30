@@ -24,4 +24,7 @@ interface GroupAppsJoinDao {
 
     @Query("DELETE FROM dm_apps_group WHERE groupId = :groupId")
     suspend fun deleteAllAppsInGroup(groupId: Long)
+
+    @Query("select * from dm_apps_group")
+    fun getAllGroupAppsJoin(): Flow<List<GroupAppsJoinEntity>>
 }

@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -45,6 +46,28 @@ import com.example.appblockerv3.data.repository.BlockingRepository
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+@Composable
+fun CreateGroupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color(0xFF4263EB), // Material 2 property for background color
+            contentColor = Color.White // Text color
+        )
+    ) {
+        Text(
+            text = "Create a Group",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -121,78 +144,87 @@ fun BlockingScreen(onNavigateToAnalytics: () -> Unit, onNavigateToFocusTimer: ()
             Spacer(modifier = Modifier.height(32.dp))
 
             // Content when no groups are created (for Grouped Blocks tab)
-            if (selectedTabIndex.value == 0) {
-                if (groupedBlocks.isEmpty()) {
-                    // Show empty state UI if no groups are found
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Content for Grouped Blocks tab
+                if (selectedTabIndex.value == 0) {
+                    if (groupedBlocks.isEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(), // This fills the weighted Column
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.no_groups_yet),
+                                style = MaterialTheme.typography.h6,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.group_description),
+                                style = MaterialTheme.typography.body2,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 32.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            // When there are no groups, the button is here, centered
+                            CreateGroupButton(
+                                onClick = onCreateGroupClick,
+                                modifier = Modifier.padding(horizontal = 32.dp) // Add horizontal padding
+                            )
+                        }
+                    } else {
+                        // Display the list of groups using LazyColumn
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(), // This fills the weighted Column
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(groupedBlocks) { groupWithDetails ->
+                                GroupBlockCard(group = groupWithDetails)
+                            }
+                            // Add some bottom padding to LazyColumn so content isn't covered by button
+                            item {
+                                Spacer(Modifier.height(80.dp)) // Sufficient space for the button
+                            }
+                        }
+                    }
+                } else { // Content for Individual Blocks tab
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(), // This fills the weighted Column
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = stringResource(R.string.no_groups_yet),
+                            text = stringResource(R.string.no_apps_found),
                             style = MaterialTheme.typography.h6,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = stringResource(R.string.group_description),
+                            text = stringResource(R.string.individual_blocks_placeholder),
                             style = MaterialTheme.typography.body2,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 32.dp)
+                            textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onCreateGroupClick) {
-                            Text(stringResource(R.string.create_a_group))
-                        }
-                    }
-                }else {
-                    // Display the list of groups using LazyColumn
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(groupedBlocks) { groupWithDetails ->
-                            // Pass the GroupWithAppsAndSchedules object to GroupBlockCard
-                            GroupBlockCard(group = groupWithDetails)
+                        Button(onClick = onSelectAppClick) {
+                            Text(stringResource(R.string.select_app))
                         }
                     }
                 }
-                Text(
-                    text = stringResource(R.string.no_groups_yet),
-                    style = MaterialTheme.typography.h6,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.group_description),
-                    style = MaterialTheme.typography.body2,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 32.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onCreateGroupClick) {
-                    Text(stringResource(R.string.create_a_group))
-                }
-            } else {
+            }
 
-                    Text(
-                        text = stringResource(R.string.no_apps_found),
-                        style = MaterialTheme.typography.h6,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.individual_blocks_placeholder),
-                        style = MaterialTheme.typography.body2,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = onSelectAppClick) {
-                        Text(stringResource(R.string.select_app))
-                    }
-
+            if (selectedTabIndex.value == 0 && groupedBlocks.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp)) // Space above the button
+                CreateGroupButton(
+                    onClick = onCreateGroupClick,
+                    modifier = Modifier.padding(horizontal = 16.dp) // Add horizontal padding
+                )
+                Spacer(modifier = Modifier.height(16.dp)) // Space below the button
             }
         }
     }
@@ -209,7 +241,7 @@ fun GroupBlockCard(group: GroupWithAppsAndSchedules) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp)),
         elevation = 4.dp,
-        backgroundColor = Color(0xFFEAEDFF) // Dark background to match image
+        backgroundColor = Color(0xFFEAEDFF)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -246,7 +278,7 @@ fun GroupBlockCard(group: GroupWithAppsAndSchedules) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Use the list of package names from GroupWithAppsAndSchedules
-                    val displayedApps = group.appPackageNames
+                    val displayedApps = group.appPackageNames.take(4)
                     displayedApps.forEach { packageName ->
                         val appIcon = remember(packageName) {
                             try {
@@ -265,11 +297,11 @@ fun GroupBlockCard(group: GroupWithAppsAndSchedules) {
                             )
                         }
                     }
-
+                    Log.d("info", "Apps: ${group.appPackageNames}")
                     if (group.appPackageNames.size > 4) {
                         Text(
                             text = "+${group.appPackageNames.size - 4}",
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = Color.Black.copy(alpha = 0.7f),
                             fontSize = 14.sp,
                             modifier = Modifier.padding(start = 4.dp)
                         )
@@ -288,7 +320,7 @@ fun GroupBlockCard(group: GroupWithAppsAndSchedules) {
                 if (group.totalUsageLimitMinutes > 0) {
                     Text(
                         text = "${group.totalUsageLimitMinutes} mins / day",
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = Color.Black.copy(alpha = 0.7f),
                         fontSize = 14.sp
                     )
                 } else {
@@ -359,13 +391,13 @@ fun ScheduleRow(schedule: ScheduleEntity) {
         ) {
             Text(
                 text = daysString,
-                color = Color.White.copy(alpha = 0.8f),
+                color = Color.Black.copy(alpha = 0.8f),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 text = "$startTime \u2192 $endTime", // Arrow symbol
-                color = Color.White.copy(alpha = 0.8f),
+                color = Color.Black.copy(alpha = 0.8f),
                 fontSize = 14.sp
             )
         }
@@ -378,7 +410,7 @@ fun ScheduleRow(schedule: ScheduleEntity) {
 fun formatDaysBitMask(bitMask: Int): String {
     // Assuming 0=Sunday, 1=Monday, ..., 6=Saturday
     // Adjust these labels if you need more specific or different representations (e.g., "Th" for Thursday)
-    val days = listOf("S", "M", "T", "W", "T", "F", "S") // Sunday is bit 0
+    val days = listOf("S", "M", "T", "W", "T", "F", "S")
     val selectedDays = mutableListOf<String>()
     for (i in days.indices) {
         if ((bitMask shr i) and 1 == 1) {

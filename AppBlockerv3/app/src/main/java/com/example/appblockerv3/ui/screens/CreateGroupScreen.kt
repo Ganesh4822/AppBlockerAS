@@ -46,7 +46,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appblockerv3.AppBlockerApplication
 import com.example.appblockerv3.data.db.dao.AppGroupDao
 import com.example.appblockerv3.data.db.dao.AppScheduleDao
+import com.example.appblockerv3.data.db.dao.GroupAppsJoinDao
 import com.example.appblockerv3.data.db.dao.IndividualAppBlockDao
+import com.example.appblockerv3.data.db.entities.GroupAppsJoinEntity
 import com.example.appblockerv3.data.db.entities.GroupBlockEntity
 import com.example.appblockerv3.data.repository.BlockingRepository
 import com.example.appblockerv3.ui.viewmodels.AppViewModelFactory
@@ -112,7 +114,8 @@ fun AppsSection(selectedAppsInfo :List<AppData> ) {
 
 
 @Composable
-fun MyGroupDisplayScreen(appGroupDao: AppGroupDao, appScheduleDao: AppScheduleDao) {
+fun MyGroupDisplayScreen(appGroupDao: AppGroupDao, appScheduleDao: AppScheduleDao
+                         ,appGroupAppsJoinDao: GroupAppsJoinDao) {
     // Collect the Flow as a State
     val allGroups: List<GroupBlockEntity> by appGroupDao.getAllAppGroups().collectAsStateWithLifecycle(
         initialValue = emptyList()
@@ -120,6 +123,11 @@ fun MyGroupDisplayScreen(appGroupDao: AppGroupDao, appScheduleDao: AppScheduleDa
     val allscedules: List<ScheduleEntity> by appScheduleDao.getAllAppSchedules().collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
+
+    val allapps: List<GroupAppsJoinEntity> by appGroupAppsJoinDao.getAllGroupAppsJoin().collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+
     LaunchedEffect(allGroups) {
         if (allGroups.isNotEmpty()) {
             Log.d("AllGroups", "Fetched all groups: $allGroups")
@@ -136,6 +144,16 @@ fun MyGroupDisplayScreen(appGroupDao: AppGroupDao, appScheduleDao: AppScheduleDa
             // Or you can iterate and print each group
             allscedules.forEachIndexed { index, schedule ->
                 Log.d("AllGroups", "Schedule ${index + 1}: $schedule")
+            }
+        } else {
+            Log.d("AllGroups", "No groups found yet or list is empty.")
+        }
+
+        if (allapps.isNotEmpty()) {
+            Log.d("Allapp", "Fetched all apps: $allapps")
+            // Or you can iterate and print each group
+            allapps.forEachIndexed { index, app ->
+                Log.d("Allapp", "Allapp ${index + 1}: $app")
             }
         } else {
             Log.d("AllGroups", "No groups found yet or list is empty.")
@@ -332,7 +350,8 @@ fun CreateGroupScreen(
 
                     // Apps Section
                     AppsSection(selectedAppsInfo)
-                    MyGroupDisplayScreen(application.database.appGroupDao(),application.database.appScheduleDao())
+                    MyGroupDisplayScreen(application.database.appGroupDao(),application.database.appScheduleDao(),
+                        application.database.groupAppsJoinDao())
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Block on a Schedule

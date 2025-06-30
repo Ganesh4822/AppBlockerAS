@@ -31,7 +31,7 @@ data class GroupWithAppsAndSchedules(
 ) {
     // Helper property to combine the two potential schedules into a list for easier UI iteration
     val appPackageNames: List<String>
-        get() = groupAppJoins.map { it.packageName }
+        get() = groupAppJoins.map { it.packageName }.distinct()
 
     val schedules: List<ScheduleEntity>
         get() = listOfNotNull(schedule1, schedule2)
