@@ -8,8 +8,10 @@ import com.example.appblockerv3.data.db.dao.GroupAppsJoinDao
 import com.example.appblockerv3.data.db.dao.IndividualAppBlockDao
 import com.example.appblockerv3.data.db.entities.GroupAppsJoinEntity
 import com.example.appblockerv3.data.db.entities.GroupBlockEntity
+import com.example.appblockerv3.data.db.entities.GroupWithAppsAndSchedules
 import com.example.appblockerv3.data.db.entities.ScheduleEntity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class BlockingRepository(
@@ -35,6 +37,10 @@ class BlockingRepository(
     // --- GroupAppsJoin Operations ---
     suspend fun insertGroupAppsJoin(join: GroupAppsJoinEntity) {
         groupAppsJoinDao.insertGroupAppsJoin(join)
+    }
+
+    fun getAllGroupBlocksWithDetails(): Flow<List<GroupWithAppsAndSchedules>> {
+        return appGroupDao.getAllGroupBlocksWithAppsAndSchedules()
     }
 
 

@@ -6,7 +6,7 @@ import java.util.Objects
 
 @Entity(tableName = "groups_fact")
 data class GroupBlockEntity(
-    @PrimaryKey(autoGenerate = true) val groupId: Long = 0,
+    @PrimaryKey(autoGenerate = false) val groupId: Long,
     val groupName: String,
     val usageLimitHours: Int = 0,
     val usageLimitMinutes: Int = 0,
