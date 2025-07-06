@@ -32,4 +32,10 @@ interface IndividualAppBlockDao {
 
     @Query("SELECT * FROM individual_blocks_fact WHERE isActive = 1")
     fun getActiveIndividualAppBlocks(): Flow<List<IndividualBlockEntity>>
+
+    @Query("SELECT * FROM individual_blocks_fact WHERE packageName = :packageName")
+    fun getIndividualAppBlock(packageName: String): Flow<IndividualBlockEntity?>
+
+    @Query("SELECT packageName FROM individual_blocks_fact")
+    fun getAllIndividualBlockedAppPackageNames(): Flow<List<String>>
 }

@@ -6,12 +6,14 @@ import com.example.appblockerv3.data.db.dao.AppGroupDao
 import com.example.appblockerv3.data.db.dao.AppScheduleDao
 import com.example.appblockerv3.data.db.dao.GroupAppsJoinDao
 import com.example.appblockerv3.data.db.dao.IndividualAppBlockDao
+import com.example.appblockerv3.data.db.entities.AppBlockingStatus
 import com.example.appblockerv3.data.db.entities.GroupAppsJoinEntity
 import com.example.appblockerv3.data.db.entities.GroupBlockEntity
 import com.example.appblockerv3.data.db.entities.GroupWithAppsAndSchedules
 import com.example.appblockerv3.data.db.entities.ScheduleEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
 
 class BlockingRepository(
@@ -20,6 +22,47 @@ class BlockingRepository(
     private val groupAppsJoinDao: GroupAppsJoinDao,
     private val individualAppBlockDao: IndividualAppBlockDao
 ) {
+
+    fun getAppBlockingStatus(packageName: String): Flow<AppBlockingStatus> {
+        return combine(
+            individualAppBlockDao.getIndividualAppBlock(packageName),
+            groupAppsJoinDao.getGroupCountForApp(packageName)
+        ) { individualBlock, groupCount ->
+            AppBlockingStatus(
+                packageName = packageName,
+                isIndividuallyBlocked = individualBlock != null,
+                groupCount = groupCount
+            )
+        }
+    }
+
+    fun getAllAppsBlockingStatus(): Flow<Map<String, AppBlockingStatus>> {
+        return combine(
+            individualAppBlockDao.getAllIndividualBlockedAppPackageNames(),
+            groupAppsJoinDao.getAppsWithGroupCounts()
+        ) { individuallyBlockedApps, appsInGroupsWithCounts ->
+            val statusMap = mutableMapOf<String, AppBlockingStatus>()
+
+            // Add individually blocked apps
+            individuallyBlockedApps.forEach { packageName ->
+                statusMap[packageName] = AppBlockingStatus(
+                    packageName = packageName,
+                    isIndividuallyBlocked = true,
+                    groupCount = statusMap[packageName]?.groupCount ?: 0
+                )
+            }
+
+            // Add apps in groups
+            appsInGroupsWithCounts.forEach { appWithCount ->
+                statusMap[appWithCount.packageName] = AppBlockingStatus(
+                    packageName = appWithCount.packageName,
+                    isIndividuallyBlocked = statusMap[appWithCount.packageName]?.isIndividuallyBlocked ?: false,
+                    groupCount = appWithCount.groupCount
+                )
+            }
+            statusMap
+        }
+    }
 
     suspend fun insertAppGroup(groupBlock: GroupBlockEntity): Long {
         return appGroupDao.insertAppGroup(groupBlock)

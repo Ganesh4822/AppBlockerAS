@@ -49,6 +49,9 @@
     <string name="set_limit">Set Limit</string>
     <string name="hrs">Hrs</string>
     <string name="mins">Mins</string>
-    <string name="select_app_to_block">Select App</string>
+
+    <string name="add_to_group">Add to Group</string>
+    <string name="select_app_to_block">Select App to Block</string>
+    <string name="blocked">Blocked</string>
 
 </resources>

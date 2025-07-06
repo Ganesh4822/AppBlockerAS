@@ -53,7 +53,7 @@ fun CreateGroupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(48.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color(0xFF4263EB), // Material 2 property for background color
@@ -67,7 +67,6 @@ fun CreateGroupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         )
     }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")

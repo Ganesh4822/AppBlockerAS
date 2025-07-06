@@ -27,4 +27,17 @@ interface GroupAppsJoinDao {
 
     @Query("select * from dm_apps_group")
     fun getAllGroupAppsJoin(): Flow<List<GroupAppsJoinEntity>>
+
+    @Query("SELECT COUNT(groupId) FROM dm_apps_group WHERE packageName = :packageName")
+    fun getGroupCountForApp(packageName: String): Flow<Int>
+
+    @Query("SELECT packageName, COUNT(groupId) AS groupCount FROM dm_apps_group GROUP BY packageName")
+    fun getAppsWithGroupCounts(): Flow<List<AppPackageNameWithGroupCount>>
+
+
 }
+
+data class AppPackageNameWithGroupCount(
+    val packageName: String,
+    val groupCount: Int
+)
