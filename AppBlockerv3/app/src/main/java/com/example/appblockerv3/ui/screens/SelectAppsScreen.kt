@@ -174,21 +174,9 @@ fun SelectAppsScreen(onNavigateBack: () -> Unit
                     SelectableAppListItem(
                         appInfo = appInfo,
                         onAppSelected = { packageName, isChecked ->
-                            val app = allApps.find { it.packageName == packageName }
-                            app?.isSelected?.value = isChecked
-                            if (isSingleSelection) {
-                                if (isChecked) {
-                                    onAppSelected(packageName) // Notify the single app selection
-                                }
-                            } else {
-                                if (isChecked) {
-                                    if (!selectedApps.contains(packageName)) {
-                                        selectedApps.add(packageName)
-                                        Log.d("Appcheck", selectedApps.toString())
-                                    }
-                                } else {
-                                    selectedApps.remove(packageName)
-                                }
+                            viewModel.updateAppSelection(packageName, isChecked)
+                            if (isSingleSelection && isChecked) {
+                                onAppSelected(packageName) // For single selection, notify immediately
                             }
                         },
                         isSingleSelection = isSingleSelection

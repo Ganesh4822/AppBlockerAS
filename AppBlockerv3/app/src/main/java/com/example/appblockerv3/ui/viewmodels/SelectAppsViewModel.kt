@@ -40,7 +40,7 @@ data class AppInfoWithStatus(
     // 1. If individually blocked, it cannot be in a group (disabled).
     // 2. If it's in 2 groups, it cannot be in another group (disabled).
     val isDisabled: Boolean
-        get() = isIndividuallyBlocked || groupCount >= 2
+        get() = isIndividuallyBlocked || groupCount >= 1
 }
 
 
